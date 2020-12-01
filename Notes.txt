@@ -1,0 +1,11 @@
+(u,v) COORDINATES ON A SPHERE AND CHECKERED:
+- u = phi/2pi	(phi -> [0,2pi])
+- v = theta/pi	(theta -> [0,pi])
+- when projecting a square onto a sphere, v gets squished by a factor of two - hence why most checkered textures look squished.
+- derived the checkered texture math myself (with a little help from Ray Tracing: The Next Week).
+- My checkered texture is seamless and in my opinion a better implementation than the one found in the book referenced above
+- If projected onto a plane, the texture shows no squishing
+
+NOTE ON DIFFUSE MATERIALS:
+- different diffuse implementations can vary the render results
+- these implementations change how light scatters off an object by changing its distribution
