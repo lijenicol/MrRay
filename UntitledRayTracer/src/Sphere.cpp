@@ -42,7 +42,7 @@ bool Sphere::hit(const Ray& r, double t_min, double t_max, hit_record& rec) cons
 	return false;
 }
 
-void Sphere::get_sphere_uv(const Vec3& p, double& u, double& v) const {
+void Sphere::get_sphere_uv(const Vec3& p, double& u, double& v) {
 	double phi = atan2(p.z(), p.x());
 	double theta = asin(p.y());
 	u = 1 - (phi + pi) / (2 * pi);

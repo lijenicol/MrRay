@@ -12,16 +12,20 @@
 #include "DiffuseLight.h"
 #include <iostream>
 
-Colour ray_colour(const Ray& r, const Colour& background, const Hittable& world, int depth) {
+Colour ray_colour(const Ray& r, std::shared_ptr<Texture> background, const Hittable& world, int depth) {
 	// Base case for recursion (add no more colour)
 	if (depth <= 0) {
 		return Colour(0, 0, 0);
 	}
 
-	// If the ray hits nothing, return the background colour
+	// If the ray hits nothing, return the skybox colour
 	hit_record rec;
-	if (!world.hit(r, 0.001, infinity, rec))
-		return background;
+	if (!world.hit(r, 0.001, infinity, rec)) {
+		// Compute u,v of hit
+		double u, v;
+		Sphere::get_sphere_uv(unit_vector(r.direction()), u, v);
+		return background->value(u,v,r.origin());
+	}
 
 	Ray scattered;
 	Colour attenuation;
@@ -63,7 +67,7 @@ HittableList cornellBox() {
 HittableList spheres() {
 	// Textures
 	std::shared_ptr<CheckerTexture> ct = std::make_shared<CheckerTexture>(Colour(0.8,0.1,0.1),Colour(1,1,1));
-	std::shared_ptr<ImageTexture> image_texture = std::make_shared<ImageTexture>("images/uv-debug.jpg");
+	std::shared_ptr<ImageTexture> image_texture = std::make_shared<ImageTexture>("images/rings.jpg");
 
 	// Materials
 	std::shared_ptr<Lambertian> red = std::make_shared<Lambertian>(Colour(.65, .05, .05));
@@ -72,11 +76,12 @@ HittableList spheres() {
 	std::shared_ptr<Lambertian> black = std::make_shared<Lambertian>(Colour(.08, .08, .08));
 	std::shared_ptr<Lambertian> checkered = std::make_shared<Lambertian>(ct);
 	std::shared_ptr<Lambertian> image_mat = std::make_shared<Lambertian>(image_texture);
+	std::shared_ptr<Dialectric> glass = std::make_shared<Dialectric>(0.01);
 
 	// Objects
 	HittableList objects;
-	objects.add(std::make_shared<Sphere>(Vec3(0, 0, 0), 4, black));
-	objects.add(std::make_shared<Disk>(Vec3(0, 0, 0), 6, 4.3, image_mat));
+	objects.add(std::make_shared<Sphere>(Vec3(0, 0, 0), 4, glass));
+	//objects.add(std::make_shared<Disk>(Vec3(0, 0, 0), 6, 4.3, image_mat));
 	//objects.add(std::make_shared<XZRect>(-6,6,-6,6,0, image_mat));
 	//objects.add(std::make_shared<Sphere>(Vec3(-6, 0, 0), 1, green));
 	//objects.add(std::make_shared<Sphere>(Vec3(6, 0, 0), 1, red));
@@ -88,10 +93,10 @@ int main() {
 	
 	// Image properties
 
-	const double aspect_ratio = 1.0;
-	const int image_width = 700;
+	const double aspect_ratio = 1.7;
+	const int image_width = 1200;
 	const int image_height = (int)(image_width / aspect_ratio);
-	const int samples_per_pixel = 20;
+	const int samples_per_pixel = 400;
 	const int max_depth = 50;
 
 	// Camera
@@ -120,10 +125,12 @@ int main() {
 		case 2:
 			lookFrom = Point3(0, 4, -10);
 			lookAt = Point3(0, 0, 0);
-			background = Colour(0.8, 0.8, 0.8);
+			background = Colour(1.0, 0, 0);
 			world = spheres();
 			break;
 	}
+
+	std::shared_ptr<ImageTexture> sb_tex = std::make_shared<ImageTexture>("images/stars.png");
 
 	// Camera
 
@@ -146,7 +153,7 @@ int main() {
 				double u = (i) / (image_width - 1.0);
 				double v = (j) / (image_height - 1.0);
 				Ray r = cam.get_ray(u, v);
-				Colour pixel_colour = ray_colour(r, background, world, max_depth);
+				Colour pixel_colour = ray_colour(r, sb_tex, world, max_depth);
 				write_colour(std::cout, pixel_colour);
 			}
 			else {
@@ -155,7 +162,7 @@ int main() {
 					double u = (i + random_double()) / (image_width - 1.0);
 					double v = (j + random_double()) / (image_height - 1.0);
 					Ray r = cam.get_ray(u, v);
-					pixel_colour += ray_colour(r, background, world, max_depth);
+					pixel_colour += ray_colour(r, sb_tex, world, max_depth);
 				}
 				write_colour(std::cout, pixel_colour / samples_per_pixel);
 			}
