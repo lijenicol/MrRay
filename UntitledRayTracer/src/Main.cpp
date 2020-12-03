@@ -4,6 +4,7 @@
 #include "Colour.h"
 #include "Sphere.h"
 #include "AARect.h"
+#include "Disk.h"
 #include "HittableList.h"
 #include "Lambertian.h"
 #include "Metal.h"
@@ -62,7 +63,7 @@ HittableList cornellBox() {
 HittableList spheres() {
 	// Textures
 	std::shared_ptr<CheckerTexture> ct = std::make_shared<CheckerTexture>(Colour(0.8,0.1,0.1),Colour(1,1,1));
-	std::shared_ptr<ImageTexture> image_texture = std::make_shared<ImageTexture>("images/globe2.jpg");
+	std::shared_ptr<ImageTexture> image_texture = std::make_shared<ImageTexture>("images/uv-debug.jpg");
 
 	// Materials
 	std::shared_ptr<Lambertian> red = std::make_shared<Lambertian>(Colour(.65, .05, .05));
@@ -74,7 +75,8 @@ HittableList spheres() {
 
 	// Objects
 	HittableList objects;
-	objects.add(std::make_shared<Sphere>(Vec3(0, 0, 0), 5, image_mat));
+	objects.add(std::make_shared<Sphere>(Vec3(0, 0, 0), 4, black));
+	objects.add(std::make_shared<Disk>(Vec3(0, 0, 0), 6, 4.3, image_mat));
 	//objects.add(std::make_shared<XZRect>(-6,6,-6,6,0, image_mat));
 	//objects.add(std::make_shared<Sphere>(Vec3(-6, 0, 0), 1, green));
 	//objects.add(std::make_shared<Sphere>(Vec3(6, 0, 0), 1, red));
@@ -89,7 +91,7 @@ int main() {
 	const double aspect_ratio = 1.0;
 	const int image_width = 700;
 	const int image_height = (int)(image_width / aspect_ratio);
-	const int samples_per_pixel = 100;
+	const int samples_per_pixel = 20;
 	const int max_depth = 50;
 
 	// Camera
@@ -116,7 +118,7 @@ int main() {
 		// Sphere setup
 		default:
 		case 2:
-			lookFrom = Point3(-10, 10, -10);
+			lookFrom = Point3(0, 4, -10);
 			lookAt = Point3(0, 0, 0);
 			background = Colour(0.8, 0.8, 0.8);
 			world = spheres();

@@ -138,6 +138,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Disk.cpp" />
     <ClCompile Include="src\HittableList.cpp" />
     <ClCompile Include="src\Sphere.cpp" />
     <ClCompile Include="src\Colour.cpp" />
@@ -145,6 +146,7 @@
     <ClCompile Include="src\AARect.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Disk.h" />
     <ClInclude Include="src\Camera.h" />
     <ClInclude Include="src\Dialectric.h" />
     <ClInclude Include="src\DiffuseLight.h" />
