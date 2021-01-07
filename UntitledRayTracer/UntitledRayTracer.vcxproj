@@ -146,6 +146,7 @@
     <ClCompile Include="src\AARect.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\AABB.h" />
     <ClInclude Include="src\Disk.h" />
     <ClInclude Include="src\Camera.h" />
     <ClInclude Include="src\Dialectric.h" />

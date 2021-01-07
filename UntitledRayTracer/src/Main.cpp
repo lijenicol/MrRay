@@ -12,6 +12,7 @@
 #include "DiffuseLight.h"
 #include <iostream>
 
+// Recursive function for calculating intersections and colour
 Colour ray_colour(const Ray& r, std::shared_ptr<Texture> background, const Hittable& world, int depth) {
 	// Base case for recursion (add no more colour)
 	if (depth <= 0) {
@@ -37,6 +38,7 @@ Colour ray_colour(const Ray& r, std::shared_ptr<Texture> background, const Hitta
 	return emitted + attenuation * ray_colour(scattered, background, world, depth - 1);
 }
 
+// Cornell Box scene
 HittableList cornellBox() {
 	// Textures
 	std::shared_ptr<ImageTexture> image_texture = std::make_shared<ImageTexture>("images/globe2.jpg");
@@ -64,6 +66,7 @@ HittableList cornellBox() {
 	return objects;
 }
 
+// Scene for test purposes 
 HittableList spheres() {
 	// Textures
 	std::shared_ptr<CheckerTexture> ct = std::make_shared<CheckerTexture>(Colour(0.8,0.1,0.1),Colour(1,1,1));
