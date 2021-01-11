@@ -4,6 +4,7 @@
 #include "Colour.h"
 #include "Sphere.h"
 #include "AARect.h"
+#include "AABB.h"
 #include "Disk.h"
 #include "HittableList.h"
 #include "Lambertian.h"
@@ -36,6 +37,16 @@ Colour ray_colour(const Ray& r, std::shared_ptr<Texture> background, const Hitta
 
 	// Recursively scatter rays
 	return emitted + attenuation * ray_colour(scattered, background, world, depth - 1);
+}
+
+// Renders an objects AABB for debug purposes
+Colour aabb_test(const Ray& r, std::shared_ptr<Hittable> object) {
+	AABB aabb;
+	object->bounding_box(0,0,aabb);
+	if (aabb.hit(r, 0.001, infinity)) {
+		return Colour(1.0, 1.0, 1.0);
+	}
+	return Colour(0.0, 0.0, 0.0);
 }
 
 // Cornell Box scene
@@ -99,8 +110,8 @@ int main() {
 	const double aspect_ratio = 1.7;
 	const int image_width = 1200;
 	const int image_height = (int)(image_width / aspect_ratio);
-	const int samples_per_pixel = 400;
-	const int max_depth = 50;
+	const int samples_per_pixel = 10;
+	const int max_depth = 14;
 
 	// Camera
 
@@ -113,7 +124,7 @@ int main() {
 	HittableList world;
 	Colour background;
 
-	switch (2) {
+	switch (1) {
 		// Cornell box setup
 		case 1:
 			lookFrom = Point3(278, 278, -800);
@@ -126,7 +137,7 @@ int main() {
 		// Sphere setup
 		default:
 		case 2:
-			lookFrom = Point3(0, 4, -10);
+			lookFrom = Point3(10, 0, -10);
 			lookAt = Point3(0, 0, 0);
 			background = Colour(1.0, 0, 0);
 			world = spheres();
@@ -151,6 +162,17 @@ int main() {
 	for (int j = image_height-1; j >= 0; j--) {
 		std::cerr << "\rScanlines remaining: " << j << ' ' << std::flush;
 		for (int i = 0; i < image_width; i++) {
+			// Debug AABB
+			std::shared_ptr<Hittable> test_object = 0;
+			if (test_object != NULL) {
+				double u = (i) / (image_width - 1.0);
+				double v = (j) / (image_height - 1.0);
+				Ray r = cam.get_ray(u, v);
+				Colour pixel_colour = aabb_test(r, test_object);
+				write_colour(std::cout, pixel_colour);
+				continue;
+			}
+
 			// Don't randomize ray direction if samples = 0
 			if (samples_per_pixel == 0) {
 				double u = (i) / (image_width - 1.0);
