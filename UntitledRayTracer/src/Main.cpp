@@ -5,6 +5,7 @@
 #include "Sphere.h"
 #include "AARect.h"
 #include "AABB.h"
+#include "BVHNode.h"
 #include "Disk.h"
 #include "HittableList.h"
 #include "Lambertian.h"
@@ -12,6 +13,7 @@
 #include "Dialectric.h"
 #include "DiffuseLight.h"
 #include <iostream>
+#include <chrono>
 
 // Recursive function for calculating intersections and colour
 Colour ray_colour(const Ray& r, std::shared_ptr<Texture> background, const Hittable& world, int depth) {
@@ -69,7 +71,6 @@ HittableList cornellBox() {
 	objects.add(std::make_shared<XZRect>(0, 555, 0, 555, 0, white));
 	objects.add(std::make_shared<XZRect>(0, 555, 0, 555, 555, white));
 	objects.add(std::make_shared<XYRect>(0, 555, 0, 555, 555, white));
-	//objects.add(std::make_shared<XZRect>(213, 343, 227, 332, 554, light));
 	objects.add(std::make_shared<XZRect>(163, 393, 177, 382, 554, light));
 	objects.add(std::make_shared<Sphere>(Vec3(278, 278, 278), 150, image_mat));
 	objects.add(std::make_shared<Sphere>(Vec3(278, 278, 278), 170, glass));
@@ -79,39 +80,45 @@ HittableList cornellBox() {
 
 // Scene for test purposes 
 HittableList spheres() {
-	// Textures
-	std::shared_ptr<CheckerTexture> ct = std::make_shared<CheckerTexture>(Colour(0.8,0.1,0.1),Colour(1,1,1));
-	std::shared_ptr<ImageTexture> image_texture = std::make_shared<ImageTexture>("images/rings.jpg");
-
 	// Materials
 	std::shared_ptr<Lambertian> red = std::make_shared<Lambertian>(Colour(.65, .05, .05));
-	std::shared_ptr<Lambertian> green = std::make_shared<Lambertian>(Colour(.12, .45, .15));
 	std::shared_ptr<Lambertian> white = std::make_shared<Lambertian>(Colour(.73, .73, .73));
-	std::shared_ptr<Lambertian> black = std::make_shared<Lambertian>(Colour(.08, .08, .08));
-	std::shared_ptr<Lambertian> checkered = std::make_shared<Lambertian>(ct);
-	std::shared_ptr<Lambertian> image_mat = std::make_shared<Lambertian>(image_texture);
-	std::shared_ptr<Dialectric> glass = std::make_shared<Dialectric>(0.01);
+	std::shared_ptr<Lambertian> green = std::make_shared<Lambertian>(Colour(.12, .45, .15));
+	std::shared_ptr<DiffuseLight> light = std::make_shared<DiffuseLight>(Colour(5, 5, 5));
 
 	// Objects
 	HittableList objects;
-	objects.add(std::make_shared<Sphere>(Vec3(0, 0, 0), 4, glass));
-	//objects.add(std::make_shared<Disk>(Vec3(0, 0, 0), 6, 4.3, image_mat));
-	//objects.add(std::make_shared<XZRect>(-6,6,-6,6,0, image_mat));
-	//objects.add(std::make_shared<Sphere>(Vec3(-6, 0, 0), 1, green));
-	//objects.add(std::make_shared<Sphere>(Vec3(6, 0, 0), 1, red));
-	//objects.add(std::make_shared<Sphere>(Vec3(0, -100, 0), 99, black));
+	objects.add(std::make_shared<XZRect>(163, 393, 177, 382, 554, light));
+	objects.add(std::make_shared<YZRect>(0, 555, 0, 555, 555, white));
+	objects.add(std::make_shared<XZRect>(0, 555, 0, 555, 0, white));
+	objects.add(std::make_shared<XYRect>(0, 555, 0, 555, 555, white));
+
+	// Spheres
+	HittableList red_spheres;
+	for (int i = 0; i < 10; i++) {
+		for (int j = 0; j < 10; j++) {
+			for (int k = 0; k < 10; k++) {
+				red_spheres.add(std::make_shared<Sphere>(Vec3(148 + 24 * i + random_double(0,4), 148 + 24 * j + random_double(0, 4), 148 + 24 * k + random_double(0, 4)), 10 + random_double(0, 6), red));
+			}
+		}
+	}
+	objects.add(std::make_shared<BVHNode>(red_spheres, 0, 0));
+	
 	return objects;
 }
 
 int main() {
+
+	// Start clock
+	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 	
 	// Image properties
 
-	const double aspect_ratio = 1.7;
-	const int image_width = 1200;
+	const double aspect_ratio = 1.0;
+	const int image_width = 1080;
 	const int image_height = (int)(image_width / aspect_ratio);
-	const int samples_per_pixel = 10;
-	const int max_depth = 14;
+	const int samples_per_pixel = 5;
+	const int max_depth = 3;
 
 	// Camera
 
@@ -122,29 +129,27 @@ int main() {
 
 	// World properties
 	HittableList world;
-	Colour background;
+	std::shared_ptr<Texture> sb_tex;
 
-	switch (1) {
+	switch (2) {
 		// Cornell box setup
 		case 1:
 			lookFrom = Point3(278, 278, -800);
 			lookAt = Point3(278, 278, 0);
 			fov = 40;
 			aperture = 0.05;
-			background = Colour(0, 0, 0);
 			world = cornellBox();
+			sb_tex = std::make_shared<SolidColour>(0.0,0.0,0.0);
 			break;
 		// Sphere setup
 		default:
 		case 2:
-			lookFrom = Point3(10, 0, -10);
-			lookAt = Point3(0, 0, 0);
-			background = Colour(1.0, 0, 0);
+			lookFrom = Point3(-100, 500, -100);
+			lookAt = Point3(278, 278, 278);
 			world = spheres();
+			sb_tex = std::make_shared<SolidColour>(0.0, 0.0, 0.0);
 			break;
 	}
-
-	std::shared_ptr<ImageTexture> sb_tex = std::make_shared<ImageTexture>("images/stars.png");
 
 	// Camera
 
@@ -157,13 +162,15 @@ int main() {
 	// Set up the ppm file headers
 	std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
 
+	// Point this to an object if you want to test AABB
+	std::shared_ptr<Hittable> test_object = 0;
+
 	// Generate image
 	// Note how j goes in reverse order - this is so scans go from bot to top
 	for (int j = image_height-1; j >= 0; j--) {
 		std::cerr << "\rScanlines remaining: " << j << ' ' << std::flush;
 		for (int i = 0; i < image_width; i++) {
 			// Debug AABB
-			std::shared_ptr<Hittable> test_object = 0;
 			if (test_object != NULL) {
 				double u = (i) / (image_width - 1.0);
 				double v = (j) / (image_height - 1.0);
@@ -194,5 +201,8 @@ int main() {
 		}
 	}
 
+	// End Clock
+	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+	std::cerr << "\nTotal time elapsed = " << std::chrono::duration_cast<std::chrono::seconds>(end - begin).count() << "s\n" << std::endl;
 	std::cerr << "\nDone.\n";
 }

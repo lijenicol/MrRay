@@ -139,6 +139,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\AABB.cpp" />
+    <ClCompile Include="src\BVHNode.cpp" />
     <ClCompile Include="src\Disk.cpp" />
     <ClCompile Include="src\HittableList.cpp" />
     <ClCompile Include="src\Sphere.cpp" />
@@ -148,6 +149,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\AABB.h" />
+    <ClInclude Include="src\BVHNode.h" />
     <ClInclude Include="src\Disk.h" />
     <ClInclude Include="src\Camera.h" />
     <ClInclude Include="src\Dialectric.h" />
