@@ -146,6 +146,7 @@
     <ClCompile Include="src\Colour.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\AARect.cpp" />
+    <ClCompile Include="src\Triangle.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\AABB.h" />
@@ -167,6 +168,7 @@
     <ClInclude Include="src\Texture.h" />
     <ClInclude Include="src\Vec3.h" />
     <ClInclude Include="src\AARect.h" />
+    <ClInclude Include="src\Triangle.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

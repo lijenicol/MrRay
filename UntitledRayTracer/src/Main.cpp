@@ -7,6 +7,7 @@
 #include "AABB.h"
 #include "BVHNode.h"
 #include "Disk.h"
+#include "Triangle.h"
 #include "HittableList.h"
 #include "Lambertian.h"
 #include "Metal.h"
@@ -107,6 +108,34 @@ HittableList spheres() {
 	return objects;
 }
 
+HittableList testScene() {
+	// Materials
+	std::shared_ptr<Lambertian> red = std::make_shared<Lambertian>(Colour(.8, .05, .05));
+	std::shared_ptr<DiffuseLight> light = std::make_shared<DiffuseLight>(Colour(5, 5, 5));
+
+	// Objects
+	HittableList objects;
+	objects.add(std::make_shared<XZRect>(-1, 1, -1, 1, 2, light));
+	objects.add(std::make_shared<XZRect>(-1, 1, -1, 1, -2, red));
+
+	// Triangle
+	auto v0 = std::make_shared<vertex_triangle>();
+	auto v1 = std::make_shared<vertex_triangle>();
+	auto v2 = std::make_shared<vertex_triangle>();
+	v0->pos = Vec3(-1.0,-1.0,0.0);
+	v0->u = 0;
+	v0->v = 0;
+	v1->pos = Vec3(1.0, -1.0, 0.0);
+	v1->u = 1;
+	v1->v = 0;
+	v2->pos = Vec3(-1.0, 1.0, -1.0);
+	v2->u = 0;
+	v2->v = 1;
+	objects.add(std::make_shared<Triangle>(v0, v1, v2, red));
+
+	return objects;
+}
+
 int main() {
 
 	// Start clock
@@ -115,10 +144,10 @@ int main() {
 	// Image properties
 
 	const double aspect_ratio = 1.0;
-	const int image_width = 1080;
+	const int image_width = 800;
 	const int image_height = (int)(image_width / aspect_ratio);
-	const int samples_per_pixel = 5;
-	const int max_depth = 3;
+	const int samples_per_pixel = 0;
+	const int max_depth = 8;
 
 	// Camera
 
@@ -141,9 +170,16 @@ int main() {
 			world = cornellBox();
 			sb_tex = std::make_shared<SolidColour>(0.0,0.0,0.0);
 			break;
+		// Test setup
+		case 2:
+			lookFrom = Point3(0, 0, 5);
+			lookAt = Point3(0, 0, 0);
+			world = testScene();
+			sb_tex = std::make_shared<SolidColour>(0.4, 0.4, 0.4);
+			break;
 		// Sphere setup
 		default:
-		case 2:
+		case 3:
 			lookFrom = Point3(-100, 500, -100);
 			lookAt = Point3(278, 278, 278);
 			world = spheres();
