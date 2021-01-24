@@ -44,6 +44,7 @@ class ImageTexture : public Texture {
 			int components_per_pixel = bytes_per_pixel;
 
 			// Load image through stb_image 
+			std::cerr << "Loading Image: " << path << "\n";
 			data = stbi_load(path, &width, &height, &components_per_pixel, components_per_pixel);
 
 			// Handle incorrect path

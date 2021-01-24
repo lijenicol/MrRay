@@ -7,12 +7,12 @@
 #include "AABB.h"
 #include "BVHNode.h"
 #include "Disk.h"
-#include "Triangle.h"
 #include "HittableList.h"
 #include "Lambertian.h"
 #include "Metal.h"
 #include "Dialectric.h"
 #include "DiffuseLight.h"
+#include "Mesh.h"
 #include <iostream>
 #include <chrono>
 
@@ -109,29 +109,20 @@ HittableList spheres() {
 }
 
 HittableList testScene() {
+	// Texture
+	std::shared_ptr<ImageTexture> image_texture = std::make_shared<ImageTexture>("images/globe2.jpg");
+
 	// Materials
 	std::shared_ptr<Lambertian> red = std::make_shared<Lambertian>(Colour(.8, .05, .05));
+	std::shared_ptr<Metal> metal = std::make_shared<Metal>(Colour(.1, .1, .1), 0.6);
 	std::shared_ptr<DiffuseLight> light = std::make_shared<DiffuseLight>(Colour(5, 5, 5));
 
 	// Objects
 	HittableList objects;
-	objects.add(std::make_shared<XZRect>(-1, 1, -1, 1, 2, light));
-	objects.add(std::make_shared<XZRect>(-1, 1, -1, 1, -2, red));
+	objects.add(std::make_shared<XZRect>(-5, 5, -5, 5, 20, light));
+	objects.add(std::make_shared<XZRect>(-50, 50, -50, 50, 0, metal));
+	objects.add(std::make_shared<Mesh>("teapot.obj", Vec3(0,0,0), red));
 
-	// Triangle
-	auto v0 = std::make_shared<vertex_triangle>();
-	auto v1 = std::make_shared<vertex_triangle>();
-	auto v2 = std::make_shared<vertex_triangle>();
-	v0->pos = Vec3(-1.0,-1.0,0.0);
-	v0->u = 0;
-	v0->v = 0;
-	v1->pos = Vec3(1.0, -1.0, 0.0);
-	v1->u = 1;
-	v1->v = 0;
-	v2->pos = Vec3(-1.0, 1.0, -1.0);
-	v2->u = 0;
-	v2->v = 1;
-	objects.add(std::make_shared<Triangle>(v0, v1, v2, red));
 
 	return objects;
 }
@@ -143,18 +134,18 @@ int main() {
 	
 	// Image properties
 
-	const double aspect_ratio = 1.0;
+	const double aspect_ratio = 4/3;
 	const int image_width = 800;
 	const int image_height = (int)(image_width / aspect_ratio);
-	const int samples_per_pixel = 0;
+	const int samples_per_pixel = 10;
 	const int max_depth = 8;
 
 	// Camera
 
 	Point3 lookFrom;
 	Point3 lookAt;
-	double fov = 70;
-	double aperture = 0.0;
+	double fov = 60.7;
+	double aperture = 0.4;
 
 	// World properties
 	HittableList world;
@@ -172,10 +163,10 @@ int main() {
 			break;
 		// Test setup
 		case 2:
-			lookFrom = Point3(0, 0, 5);
-			lookAt = Point3(0, 0, 0);
+			lookFrom = Point3(0, 3.5, 8);
+			lookAt = Point3(0, 1.3, 0);
 			world = testScene();
-			sb_tex = std::make_shared<SolidColour>(0.4, 0.4, 0.4);
+			sb_tex = std::make_shared<SolidColour>(0.005, 0.005, 0.005);
 			break;
 		// Sphere setup
 		default:
@@ -196,6 +187,8 @@ int main() {
 	// Render
 
 	// Set up the ppm file headers
+	//std::cout << "# Samples Per Pixel: " << samples_per_pixel << "\n";
+	//std::cout << "# Ray Depth: " << max_depth << "\n";
 	std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
 
 	// Point this to an object if you want to test AABB
@@ -239,6 +232,7 @@ int main() {
 
 	// End Clock
 	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+	//std::cout << "# Time Taken: " << std::chrono::duration_cast<std::chrono::seconds>(end - begin).count() << "s\n";
 	std::cerr << "\nTotal time elapsed = " << std::chrono::duration_cast<std::chrono::seconds>(end - begin).count() << "s\n" << std::endl;
 	std::cerr << "\nDone.\n";
 }

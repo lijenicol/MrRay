@@ -142,6 +142,7 @@
     <ClCompile Include="src\BVHNode.cpp" />
     <ClCompile Include="src\Disk.cpp" />
     <ClCompile Include="src\HittableList.cpp" />
+    <ClCompile Include="src\Mesh.cpp" />
     <ClCompile Include="src\Sphere.cpp" />
     <ClCompile Include="src\Colour.cpp" />
     <ClCompile Include="src\Main.cpp" />
@@ -158,6 +159,7 @@
     <ClInclude Include="src\HittableList.h" />
     <ClInclude Include="src\Lambertian.h" />
     <ClInclude Include="src\Material.h" />
+    <ClInclude Include="src\Mesh.h" />
     <ClInclude Include="src\Metal.h" />
     <ClInclude Include="src\rtutils.h" />
     <ClInclude Include="src\rt_stb_image.h" />
