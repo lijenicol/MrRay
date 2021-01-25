@@ -6,9 +6,9 @@
 class BVHNode : public Hittable {
 public:
 	BVHNode(){}
-	BVHNode(const HittableList& list, double time0, double time1)
-		: BVHNode(list.objects, 0, list.objects.size(), time0, time1) {std::cerr << "Creating BVH.\n";}
-	BVHNode(const std::vector<std::shared_ptr<Hittable>>& src_objects, size_t start, size_t end, double time0, double time1);
+	BVHNode(HittableList& list, double time0, double time1)
+		: BVHNode(list.objects, 0, list.objects.size(), time0, time1, 0) {}
+	BVHNode(std::vector<std::shared_ptr<Hittable>>& src_objects, size_t start, size_t end, double time0, double time1, int depth);
 
 	virtual bool hit(const Ray& r, double t_min, double t_max, hit_record& rec) const override;
 	virtual bool bounding_box(double time0, double time1, AABB& output_box) const override;

@@ -115,6 +115,7 @@ Mesh::Mesh(std::string filename, const Vec3 pos, std::shared_ptr<Material> mat) 
 	}
 
 	// Construct triangle instances from indices
+	std::cerr << "Reordering Vertices and Creating Triangles\n";
 	for (unsigned int i = 0; i < triangleIndices.size(); i++) {
 		auto v0 = std::make_shared<vertex_triangle>();
 		auto v1 = std::make_shared<vertex_triangle>();
@@ -141,6 +142,8 @@ Mesh::Mesh(std::string filename, const Vec3 pos, std::shared_ptr<Material> mat) 
 
 		triangles.add(std::make_shared<Triangle>(v0,v1,v2, mat));
 	}
+	std::cerr << "Mesh Construction Completed\n";
+	std::cerr << "Creating BVH.\n";
 
 	// This will need to change if animation is added
 	container = new BVHNode(triangles, 0, 0);

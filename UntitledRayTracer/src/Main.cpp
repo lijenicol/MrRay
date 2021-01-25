@@ -114,14 +114,14 @@ HittableList testScene() {
 
 	// Materials
 	std::shared_ptr<Lambertian> red = std::make_shared<Lambertian>(Colour(.8, .05, .05));
-	std::shared_ptr<Metal> metal = std::make_shared<Metal>(Colour(.1, .1, .1), 0.6);
+	std::shared_ptr<Metal> metal = std::make_shared<Metal>(Colour(.1, .1, .1), 0.5);
 	std::shared_ptr<DiffuseLight> light = std::make_shared<DiffuseLight>(Colour(5, 5, 5));
 
 	// Objects
 	HittableList objects;
-	objects.add(std::make_shared<XZRect>(-5, 5, -5, 5, 20, light));
-	objects.add(std::make_shared<XZRect>(-50, 50, -50, 50, 0, metal));
-	objects.add(std::make_shared<Mesh>("teapot.obj", Vec3(0,0,0), red));
+	objects.add(std::make_shared<XZRect>(-5, 5, -5, 5, 10, light));
+	objects.add(std::make_shared<XZRect>(-50, 50, -50, 50, -2, metal));
+	objects.add(std::make_shared<Mesh>("dragon.obj", Vec3(0,0,0), red));
 
 
 	return objects;
@@ -163,10 +163,10 @@ int main() {
 			break;
 		// Test setup
 		case 2:
-			lookFrom = Point3(0, 3.5, 8);
-			lookAt = Point3(0, 1.3, 0);
+			lookFrom = Point3(0, 3, 3);
+			lookAt = Point3(0, 0, 0);
 			world = testScene();
-			sb_tex = std::make_shared<SolidColour>(0.005, 0.005, 0.005);
+			sb_tex = std::make_shared<SolidColour>(0.9, 0.9, 0.9);
 			break;
 		// Sphere setup
 		default:

@@ -1,8 +1,9 @@
 #include "BVHNode.h"
 #include <algorithm>
 
-BVHNode::BVHNode(const std::vector<std::shared_ptr<Hittable>>& src_objects, size_t start, size_t end, double time0, double time1) {
-	auto objects = src_objects;
+BVHNode::BVHNode(std::vector<std::shared_ptr<Hittable>>& objects, size_t start, size_t end, double time0, double time1, int depth) {
+	std::cerr << "Current Construction Depth: " << depth << "\n";
+	//auto objects = src_objects;
 	int axis = random_int(0, 2);
 	auto comparator = (axis == 0) ? box_x_compare
 				 : (axis == 1) ? box_y_compare
@@ -31,8 +32,8 @@ BVHNode::BVHNode(const std::vector<std::shared_ptr<Hittable>>& src_objects, size
 
 		// Split objects around axis
 		size_t mid = start + object_span / 2;
-		left = std::make_shared<BVHNode>(objects, start, mid, time0, time1);
-		right = std::make_shared<BVHNode>(objects, mid, end, time0, time1);
+		left = std::make_shared<BVHNode>(objects, start, mid, time0, time1, depth+1);
+		right = std::make_shared<BVHNode>(objects, mid, end, time0, time1, depth+1);
 	}
 
 	// Setup bounding box for the BVH node
