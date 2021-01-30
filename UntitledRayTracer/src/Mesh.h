@@ -11,10 +11,10 @@
 class Mesh : public Hittable {
 	public:
 		BVHNode* container;
-		Vec3 pos;
+		bool smooth_shading;
 		std::shared_ptr<Material> mat;
 
-		Mesh(std::string filename, const Vec3 pos, std::shared_ptr<Material> mat);
+		Mesh(std::string filename, const bool smooth_shading, std::shared_ptr<Material> mat);
 
 		virtual bool hit(const Ray& r, double t_min, double t_max, hit_record& rec) const override;
 		virtual bool bounding_box(double time0, double time1, AABB& output_box) const override;

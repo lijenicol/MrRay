@@ -110,18 +110,26 @@ HittableList spheres() {
 
 HittableList testScene() {
 	// Texture
-	std::shared_ptr<ImageTexture> image_texture = std::make_shared<ImageTexture>("images/globe2.jpg");
+	std::shared_ptr<ImageTexture> image_texture = std::make_shared<ImageTexture>("images/snowglobe.png");
 
 	// Materials
 	std::shared_ptr<Lambertian> red = std::make_shared<Lambertian>(Colour(.8, .05, .05));
-	std::shared_ptr<Metal> metal = std::make_shared<Metal>(Colour(.1, .1, .1), 0.5);
+	std::shared_ptr<Metal> metal = std::make_shared<Metal>(Colour(.4, .4, .4), 0.5);
 	std::shared_ptr<DiffuseLight> light = std::make_shared<DiffuseLight>(Colour(5, 5, 5));
+	std::shared_ptr<Dialectric> glass = std::make_shared<Dialectric>(1.1);
+	std::shared_ptr<Lambertian> white = std::make_shared<Lambertian>(Colour(.73, .73, .73));
+	std::shared_ptr<Lambertian> image_mat = std::make_shared<Lambertian>(image_texture);
 
 	// Objects
 	HittableList objects;
-	objects.add(std::make_shared<XZRect>(-5, 5, -5, 5, 10, light));
-	objects.add(std::make_shared<XZRect>(-50, 50, -50, 50, -2, metal));
-	objects.add(std::make_shared<Mesh>("dragon.obj", Vec3(0,0,0), red));
+	objects.add(std::make_shared<XZRect>(-3, 3, -3, 3, 6, light));
+	objects.add(std::make_shared<XZRect>(-8, 8, -8, 8, 0, white));
+	//objects.add(std::make_shared<YZRect>(-8, 8, -8, 8, -8, white));
+	//objects.add(std::make_shared<XYRect>(-8, 8, -8, 8, 8, white));
+	//objects.add(std::make_shared<Mesh>("models/snowglobe_base.obj", Vec3(0,0,0), red));
+	objects.add(std::make_shared<Mesh>("models/snowglobe_innerglass.obj", true, image_mat));
+	objects.add(std::make_shared<Mesh>("models/snowglobe_outerglass.obj", true, glass));
+	objects.add(std::make_shared<Mesh>("models/dragon.obj", true, glass));
 
 
 	return objects;
@@ -134,18 +142,18 @@ int main() {
 	
 	// Image properties
 
-	const double aspect_ratio = 4/3;
-	const int image_width = 800;
+	const double aspect_ratio = 16.0/9;
+	const int image_width = 1200;
 	const int image_height = (int)(image_width / aspect_ratio);
-	const int samples_per_pixel = 10;
-	const int max_depth = 8;
+	const int samples_per_pixel = 400;
+	const int max_depth = 12;
 
 	// Camera
 
 	Point3 lookFrom;
 	Point3 lookAt;
-	double fov = 60.7;
-	double aperture = 0.4;
+	double fov = 48.5;
+	double aperture = 0;
 
 	// World properties
 	HittableList world;
@@ -163,10 +171,10 @@ int main() {
 			break;
 		// Test setup
 		case 2:
-			lookFrom = Point3(0, 3, 3);
-			lookAt = Point3(0, 0, 0);
+			lookFrom = Point3(-5.75, 1.8, 2.7);
+			lookAt = Point3(2, 0, 0);
 			world = testScene();
-			sb_tex = std::make_shared<SolidColour>(0.9, 0.9, 0.9);
+			sb_tex = std::make_shared<SolidColour>(0., 0., 0.);
 			break;
 		// Sphere setup
 		default:

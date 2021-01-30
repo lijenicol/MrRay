@@ -39,31 +39,56 @@ bool Triangle::hit(const Ray& r, double t_min, double t_max, hit_record& rec) co
 	if (testThree < 0)
 		return false;
 
+	// Compute barycentric weights
+	Vec3 w;
+	w = get_triangle_barycentric(rec.p);
+
 	// Set hit record
 	rec.t = t;
 	rec.p = intersectionPoint;
-	rec.set_face_normal(r, normal);
 	get_triangle_uv(rec.p, rec.u, rec.v);
 	rec.mat = mat;
+
+	// If smooth shading then use interpolated normals
+	if (smooth_shading) {
+		Vec3 _normal = get_triangle_normal(w);
+		rec.set_face_normal(r, _normal);
+	}
+	else {
+		rec.set_face_normal(r, normal);
+	}
 
 	return true;
 }
 
-void Triangle::get_triangle_uv(const Vec3& p, double& u, double& v) const {
+Vec3 Triangle::get_triangle_barycentric(const Vec3& p) const {
 	// Get triangle areas
 	double total_area_2 = cross(v1->pos - v0->pos, v2->pos - v0->pos).length();
 	double a_area_2 = cross(p - v2->pos, p - v1->pos).length();
-	double b_area_2 = cross(p-v0->pos, p-v2->pos).length();
-	double c_area_2 = cross(p-v1->pos, p-v0->pos).length();
+	double b_area_2 = cross(p - v0->pos, p - v2->pos).length();
+	double c_area_2 = cross(p - v1->pos, p - v0->pos).length();
 
 	// Compute barycentric
 	double wa = a_area_2 / total_area_2;
 	double wb = b_area_2 / total_area_2;
 	double wc = c_area_2 / total_area_2;
 
-	// Compute u,v coords
-	u = v0->u * wa + v1->u * wb + v2->u * wc;
-	v = v0->v * wa + v1->v * wb + v2->v * wc;
+	return Vec3(wa, wb, wc);
+}
+
+// Takes in the already pre-computed barycentric coordinates of the point in question
+void Triangle::get_triangle_uv(const Vec3& w, double& u, double& v) const {
+	// Compute interpolated u,v coords
+	u = v0->u * w[0] + v1->u * w[1] + v2->u * w[2];
+	v = v0->v * w[0] + v1->v * w[1] + v2->v * w[2];
+}
+
+Vec3 Triangle::get_triangle_normal(const Vec3& w) const {
+	// Compute interpolated normal
+	double x = v0->normal[0] * w[0] + v1->normal[0] * w[1] + v2->normal[0] * w[2];
+	double y = v0->normal[1] * w[0] + v1->normal[1] * w[1] + v2->normal[1] * w[2];
+	double z = v0->normal[2] * w[0] + v1->normal[2] * w[1] + v2->normal[2] * w[2];
+	return unit_vector(Vec3(x,y,z));
 }
 
 bool Triangle::bounding_box(double time0, double time1, AABB& output_box) const {

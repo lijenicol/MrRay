@@ -5,7 +5,7 @@
 #include <fstream>
 
 // Setup triangles and BVH structure
-Mesh::Mesh(std::string filename, const Vec3 pos, std::shared_ptr<Material> mat) : pos(pos), mat(mat) {
+Mesh::Mesh(std::string filename, const bool smooth_shading, std::shared_ptr<Material> mat) : smooth_shading(smooth_shading), mat(mat) {
 	std::cerr << "Loading Mesh: " << filename << "\n";
 	HittableList triangles;
 
@@ -140,7 +140,7 @@ Mesh::Mesh(std::string filename, const Vec3 pos, std::shared_ptr<Material> mat) 
 			v2->v = inputTexCoords[texCoordIndices[i].z()].y();
 		}
 
-		triangles.add(std::make_shared<Triangle>(v0,v1,v2, mat));
+		triangles.add(std::make_shared<Triangle>(v0,v1,v2, mat, smooth_shading));
 	}
 	std::cerr << "Mesh Construction Completed\n";
 	std::cerr << "Creating BVH.\n";

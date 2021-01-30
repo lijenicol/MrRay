@@ -19,10 +19,11 @@ class Triangle : public Hittable
 		Vec3 normal;
 		std::shared_ptr<Material> mat;
 		AABB box;
+		bool smooth_shading;
 
 		Triangle(std::shared_ptr<vertex_triangle> v0, std::shared_ptr<vertex_triangle> v1, 
-			std::shared_ptr<vertex_triangle> v2, std::shared_ptr<Material> mat)
-				: mat(mat), v0(v0), v1(v1), v2(v2) {
+			std::shared_ptr<vertex_triangle> v2, std::shared_ptr<Material> mat, bool smooth_shading)
+				: mat(mat), v0(v0), v1(v1), v2(v2), smooth_shading(smooth_shading) {
 			normal = unit_vector(cross(v1->pos - v0->pos, v2->pos - v0->pos));
 
 			// calculate min/max x
@@ -42,6 +43,8 @@ class Triangle : public Hittable
 		virtual bool hit(const Ray& r, double t_min, double t_max, hit_record& rec) const override;
 		virtual bool bounding_box(double time0, double time1, AABB& output_box) const override;
 	private: 
-		void get_triangle_uv(const Vec3& p, double& u, double& v) const;
+		void get_triangle_uv(const Vec3 &w, double& u, double& v) const;
+		Vec3 get_triangle_barycentric(const Vec3& p) const;
+		Vec3 get_triangle_normal(const Vec3 &w) const;
 };
 
