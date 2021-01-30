@@ -140,7 +140,10 @@ Mesh::Mesh(std::string filename, const bool smooth_shading, std::shared_ptr<Mate
 			v2->v = inputTexCoords[texCoordIndices[i].z()].y();
 		}
 
-		triangles.add(std::make_shared<Triangle>(v0,v1,v2, mat, smooth_shading));
+		// Construct a triangle. If normals aren't specified, never use 
+		// smooth shading (this is a bit of a hack)
+		triangles.add(std::make_shared<Triangle>(v0,v1,v2, mat
+			, inputNormals.size() != 0 ? smooth_shading : false));
 	}
 	std::cerr << "Mesh Construction Completed\n";
 	std::cerr << "Creating BVH.\n";

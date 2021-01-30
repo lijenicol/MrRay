@@ -135,6 +135,20 @@ HittableList testScene() {
 	return objects;
 }
 
+HittableList testSky() {
+	// Materials
+	std::shared_ptr<Lambertian> red = std::make_shared<Lambertian>(Colour(.8, .05, .05));
+	std::shared_ptr<Metal> metal = std::make_shared<Metal>(Colour(.4, .4, .4), 0.01);
+	std::shared_ptr<DiffuseLight> light = std::make_shared<DiffuseLight>(Colour(5, 5, 5));
+
+	// Objects
+	HittableList objects;
+	objects.add(std::make_shared<XZRect>(-3, 3, -3, 3, 6, light));
+	objects.add(std::make_shared<Mesh>("models/bunny.obj", true, metal));
+
+	return objects;
+}
+
 int main() {
 
 	// Start clock
@@ -145,7 +159,7 @@ int main() {
 	const double aspect_ratio = 16.0/9;
 	const int image_width = 1200;
 	const int image_height = (int)(image_width / aspect_ratio);
-	const int samples_per_pixel = 400;
+	const int samples_per_pixel = 10;
 	const int max_depth = 12;
 
 	// Camera
@@ -159,7 +173,7 @@ int main() {
 	HittableList world;
 	std::shared_ptr<Texture> sb_tex;
 
-	switch (2) {
+	switch (3) {
 		// Cornell box setup
 		case 1:
 			lookFrom = Point3(278, 278, -800);
@@ -176,9 +190,15 @@ int main() {
 			world = testScene();
 			sb_tex = std::make_shared<SolidColour>(0., 0., 0.);
 			break;
+		case 3:
+			lookFrom = Point3(-10, 5, 10);
+			lookAt = Point3(0, 3, 0);
+			world = testSky();
+			sb_tex = std::make_shared<ImageTexture>("images/small_hangar.hdr");
+			break;
 		// Sphere setup
 		default:
-		case 3:
+		case 4:
 			lookFrom = Point3(-100, 500, -100);
 			lookAt = Point3(278, 278, 278);
 			world = spheres();

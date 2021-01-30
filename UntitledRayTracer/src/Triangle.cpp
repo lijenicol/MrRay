@@ -4,8 +4,8 @@ bool Triangle::hit(const Ray& r, double t_min, double t_max, hit_record& rec) co
 	// Check first bounding box intersection test. This is to speed up calculations (hypothetically)
 	// May remove in the future because having triangles in a BVH will automatically cure this problem
 	// However, for now it does the job
-	if (!box.hit(r, t_min, t_max))
-		return false;
+	/*if (!box.hit(r, t_min, t_max))
+		return false;*/
 
 	//return if ray is parallel with triangle
 	if (dot(normal, r.direction()) == 0)
