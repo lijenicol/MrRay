@@ -13,6 +13,7 @@
 #include "Dialectric.h"
 #include "DiffuseLight.h"
 #include "Mesh.h"
+#include "Transform.h"
 #include <iostream>
 #include <chrono>
 
@@ -127,9 +128,9 @@ HittableList testScene() {
 	//objects.add(std::make_shared<YZRect>(-8, 8, -8, 8, -8, white));
 	//objects.add(std::make_shared<XYRect>(-8, 8, -8, 8, 8, white));
 	//objects.add(std::make_shared<Mesh>("models/snowglobe_base.obj", Vec3(0,0,0), red));
-	objects.add(std::make_shared<Mesh>("models/snowglobe_innerglass.obj", true, image_mat));
-	objects.add(std::make_shared<Mesh>("models/snowglobe_outerglass.obj", true, glass));
-	objects.add(std::make_shared<Mesh>("models/dragon.obj", true, glass));
+	objects.add(std::make_shared<Mesh>("models/snowglobe_innerglass.obj", 1.0, true, image_mat));
+	objects.add(std::make_shared<Mesh>("models/snowglobe_outerglass.obj", 1.0, true, glass));
+	objects.add(std::make_shared<Mesh>("models/dragon.obj", 1.0, true, glass));
 
 
 	return objects;
@@ -140,11 +141,15 @@ HittableList testSky() {
 	std::shared_ptr<Lambertian> red = std::make_shared<Lambertian>(Colour(.8, .05, .05));
 	std::shared_ptr<Metal> metal = std::make_shared<Metal>(Colour(.4, .4, .4), 0.01);
 	std::shared_ptr<DiffuseLight> light = std::make_shared<DiffuseLight>(Colour(5, 5, 5));
+	std::shared_ptr<Lambertian> white = std::make_shared<Lambertian>(Colour(.9, .9, .9));
+
+	// Object instances
+	std::shared_ptr<Hittable> obj = std::make_shared<Mesh>("models/bunny.obj", 3, true, white);
 
 	// Objects
 	HittableList objects;
-	objects.add(std::make_shared<XZRect>(-3, 3, -3, 3, 6, light));
-	objects.add(std::make_shared<Mesh>("models/bunny.obj", true, metal));
+	//objects.add(std::make_shared<XZRect>(-3, 3, -3, 3, 6, light));
+	objects.add(std::make_shared<Translate>(obj, Vec3(0,3,0)));
 
 	return objects;
 }
@@ -159,7 +164,7 @@ int main() {
 	const double aspect_ratio = 16.0/9;
 	const int image_width = 1200;
 	const int image_height = (int)(image_width / aspect_ratio);
-	const int samples_per_pixel = 10;
+	const int samples_per_pixel = 400;
 	const int max_depth = 12;
 
 	// Camera

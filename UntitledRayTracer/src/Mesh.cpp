@@ -5,7 +5,7 @@
 #include <fstream>
 
 // Setup triangles and BVH structure
-Mesh::Mesh(std::string filename, const bool smooth_shading, std::shared_ptr<Material> mat) : smooth_shading(smooth_shading), mat(mat) {
+Mesh::Mesh(std::string filename, double scale, const bool smooth_shading, std::shared_ptr<Material> mat) : smooth_shading(smooth_shading), mat(mat), scale(scale) {
 	std::cerr << "Loading Mesh: " << filename << "\n";
 	HittableList triangles;
 
@@ -114,16 +114,16 @@ Mesh::Mesh(std::string filename, const bool smooth_shading, std::shared_ptr<Mate
 		std::cout << "File cannot be read or does not exist: " << filename;
 	}
 
-	// Construct triangle instances from indices
+	// Construct triangle instances from indices and scale vertices
 	std::cerr << "Reordering Vertices and Creating Triangles\n";
 	for (unsigned int i = 0; i < triangleIndices.size(); i++) {
 		auto v0 = std::make_shared<vertex_triangle>();
 		auto v1 = std::make_shared<vertex_triangle>();
 		auto v2 = std::make_shared<vertex_triangle>();
 
-		v0->pos = inputPoints[triangleIndices[i].x()];
-		v1->pos = inputPoints[triangleIndices[i].y()];
-		v2->pos = inputPoints[triangleIndices[i].z()];
+		v0->pos = inputPoints[triangleIndices[i].x()] * scale;
+		v1->pos = inputPoints[triangleIndices[i].y()] * scale;
+		v2->pos = inputPoints[triangleIndices[i].z()] * scale;
 
 		if (inputNormals.size() != 0) {
 			v0->normal = inputNormals[normalIndices[i].x()];

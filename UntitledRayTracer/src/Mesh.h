@@ -13,8 +13,9 @@ class Mesh : public Hittable {
 		BVHNode* container;
 		bool smooth_shading;
 		std::shared_ptr<Material> mat;
+		double scale;
 
-		Mesh(std::string filename, const bool smooth_shading, std::shared_ptr<Material> mat);
+		Mesh(std::string filename, double scale, const bool smooth_shading, std::shared_ptr<Material> mat);
 
 		virtual bool hit(const Ray& r, double t_min, double t_max, hit_record& rec) const override;
 		virtual bool bounding_box(double time0, double time1, AABB& output_box) const override;
