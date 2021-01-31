@@ -138,18 +138,31 @@ HittableList testScene() {
 
 HittableList testSky() {
 	// Materials
-	std::shared_ptr<Lambertian> red = std::make_shared<Lambertian>(Colour(.8, .05, .05));
-	std::shared_ptr<Metal> metal = std::make_shared<Metal>(Colour(.4, .4, .4), 0.01);
-	std::shared_ptr<DiffuseLight> light = std::make_shared<DiffuseLight>(Colour(5, 5, 5));
-	std::shared_ptr<Lambertian> white = std::make_shared<Lambertian>(Colour(.9, .9, .9));
+	std::shared_ptr<DiffuseLight> red = std::make_shared<DiffuseLight>(Colour(4.95, .05, .05));
+	std::shared_ptr<DiffuseLight> green = std::make_shared<DiffuseLight>(Colour(.05, 4.95, .05));
+	std::shared_ptr<DiffuseLight> blue = std::make_shared<DiffuseLight>(Colour(.05, .05, 4.95));
+	std::shared_ptr<Metal> metal = std::make_shared<Metal>(Colour(.4, .4, .4), 0.0);
+	std::shared_ptr<DiffuseLight> light = std::make_shared<DiffuseLight>(Colour(3, 3, 3));
+	std::shared_ptr<Lambertian> white = std::make_shared<Lambertian>(Colour(1, 1, 1));
 
 	// Object instances
-	std::shared_ptr<Hittable> obj = std::make_shared<Mesh>("models/bunny.obj", 3, true, white);
+	std::shared_ptr<Hittable> obj = std::make_shared<Mesh>("models/hood_greek.obj", 6, true, light);
+	std::shared_ptr<Hittable> obj2 = std::make_shared<Mesh>("models/greek.obj", 3, true, metal);
 
 	// Objects
 	HittableList objects;
 	//objects.add(std::make_shared<XZRect>(-3, 3, -3, 3, 6, light));
-	objects.add(std::make_shared<Translate>(obj, Vec3(0,3,0)));
+	objects.add(std::make_shared<Translate>(obj, Vec3(0, 1, 25)));
+	objects.add(std::make_shared<Translate>(obj2, Vec3(0, -0.5, 0)));
+	objects.add(std::make_shared<XZRect>(-2000, 2000, -2000, 2000, -0.5, white));
+
+	// RGB Spheres
+	std::shared_ptr<Hittable> s1 = std::make_shared<Sphere>(Vec3(-5, 5, 15), 2.5, red);
+	std::shared_ptr<Hittable> s2 = std::make_shared<Sphere>(Vec3(5, 15, 10), 2, blue);
+	std::shared_ptr<Hittable> s3 = std::make_shared<Sphere>(Vec3(10, 0, 10), 2, green);
+	objects.add(s1);
+	objects.add(s2);
+	objects.add(s3);
 
 	return objects;
 }
@@ -161,11 +174,11 @@ int main() {
 	
 	// Image properties
 
-	const double aspect_ratio = 16.0/9;
-	const int image_width = 1200;
+	const double aspect_ratio = 2.0/3.0;
+	const int image_width = 1500;
 	const int image_height = (int)(image_width / aspect_ratio);
 	const int samples_per_pixel = 400;
-	const int max_depth = 12;
+	const int max_depth = 14;
 
 	// Camera
 
@@ -191,15 +204,16 @@ int main() {
 		// Test setup
 		case 2:
 			lookFrom = Point3(-5.75, 1.8, 2.7);
-			lookAt = Point3(2, 0, 0);
+			lookAt = Point3(0, 0, 0);
 			world = testScene();
 			sb_tex = std::make_shared<SolidColour>(0., 0., 0.);
 			break;
 		case 3:
-			lookFrom = Point3(-10, 5, 10);
+			lookFrom = Point3(15, 8, 15);
 			lookAt = Point3(0, 3, 0);
 			world = testSky();
-			sb_tex = std::make_shared<ImageTexture>("images/small_hangar.hdr");
+			//sb_tex = std::make_shared<ImageTexture>("images/small_hangar.hdr");
+			sb_tex = std::make_shared<SolidColour>(0., 0., 0.);
 			break;
 		// Sphere setup
 		default:

@@ -8,8 +8,9 @@ bool Triangle::hit(const Ray& r, double t_min, double t_max, hit_record& rec) co
 		return false;*/
 
 	//return if ray is parallel with triangle
-	if (dot(normal, r.direction()) == 0)
+	if (dot(normal, r.direction()) == 0) {
 		return false;
+	}
 
 	//calculate plane intersection
 	float d = dot(normal, v0->pos);

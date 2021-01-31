@@ -1,9 +1,8 @@
 #include "BVHNode.h"
 #include <algorithm>
 
-BVHNode::BVHNode(std::vector<std::shared_ptr<Hittable>>& objects, size_t start, size_t end, double time0, double time1, int depth) {
-	std::cerr << "Current Construction Depth: " << depth << "\n";
-	//auto objects = src_objects;
+BVHNode::BVHNode(std::vector<std::shared_ptr<Hittable>>& objects, size_t start, size_t end, double time0, double time1, int depth, int *sorted_counter) {
+	// Choose axis for split
 	int axis = random_int(0, 2);
 	auto comparator = (axis == 0) ? box_x_compare
 				 : (axis == 1) ? box_y_compare
@@ -14,6 +13,7 @@ BVHNode::BVHNode(std::vector<std::shared_ptr<Hittable>>& objects, size_t start, 
 	if (object_span == 1) {
 		left = objects[start];
 		right = NULL;
+		*sorted_counter += 1;
 	}
 	else if (object_span == 2) {
 		// Figure which object goes either side of the split
@@ -25,6 +25,12 @@ BVHNode::BVHNode(std::vector<std::shared_ptr<Hittable>>& objects, size_t start, 
 			left = objects[start + 1];
 			right = objects[start];
 		}
+		*sorted_counter += 2;
+
+		int percent_done = (100.0f * (float)((float)*sorted_counter / objects.size()));
+		if (percent_done % 10 == 0) {
+			std::cerr << "\rBVH Construction " << percent_done << "% Complete" << std::flush;
+		}
 	}
 	else {
 		// Sort objects along axis
@@ -32,8 +38,8 @@ BVHNode::BVHNode(std::vector<std::shared_ptr<Hittable>>& objects, size_t start, 
 
 		// Split objects around axis
 		size_t mid = start + object_span / 2;
-		left = std::make_shared<BVHNode>(objects, start, mid, time0, time1, depth+1);
-		right = std::make_shared<BVHNode>(objects, mid, end, time0, time1, depth+1);
+		left = std::make_shared<BVHNode>(objects, start, mid, time0, time1, depth+1, sorted_counter);
+		right = std::make_shared<BVHNode>(objects, mid, end, time0, time1, depth+1, sorted_counter);
 	}
 
 	// Setup bounding box for the BVH node
