@@ -125,7 +125,9 @@ HittableList testScene() {
 	// Objects
 	HittableList objects;
 	//objects.add(std::make_shared<XZRect>(-3, 3, -3, 3, 6, light));
-	objects.add(std::make_shared<Mesh>("models/snowglobe_innerglass.obj", 0.8, false, image_mat));
+	std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>("models/hood_greek.obj", 0.1, false, image_mat);
+	objects.add(mesh);
+	mesh.get()->print(true);
 
 	// Test ccw triangle intersections to find where we are going wrong
 	/*auto v0 = std::make_shared<vertex_triangle>();
@@ -177,7 +179,6 @@ int main() {
 	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 	
 	// Image properties
-
 	const double aspect_ratio = 1.0;
 	const int image_width = 800;
 	const int image_height = (int)(image_width / aspect_ratio);
@@ -185,7 +186,6 @@ int main() {
 	const int max_depth = 5;
 
 	// Camera
-
 	Point3 lookFrom;
 	Point3 lookAt;
 	double fov = 48.5;
@@ -194,6 +194,18 @@ int main() {
 	// World properties
 	HittableList world;
 	std::shared_ptr<Texture> sb_tex;
+
+	// Texture
+	std::shared_ptr<ImageTexture> image_texture = std::make_shared<ImageTexture>("images/snowglobe.png");
+
+	// Materials
+	std::shared_ptr<Lambertian> white = std::make_shared<Lambertian>(Colour(.72, .77, .77));
+	std::shared_ptr<Lambertian> image_mat = std::make_shared<Lambertian>(image_texture);
+
+	// Objects
+	std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>("models/hood_greek.obj", 0.1, false, image_mat);
+	world.add(mesh);
+	mesh.get()->print(true);
 
 	switch (2) {
 		// Cornell box setup
@@ -209,7 +221,7 @@ int main() {
 		case 2:
 			lookFrom = Point3(0, 1, 2.7);
 			lookAt = Point3(0, 0.5, 0);
-			world = testScene();
+			// world = testScene();
 			sb_tex = std::make_shared<SolidColour>(0.5, 0.5, 0.5);
 			break;
 		case 3:
@@ -288,4 +300,6 @@ int main() {
 	//std::cout << "# Time Taken: " << std::chrono::duration_cast<std::chrono::seconds>(end - begin).count() << "s\n";
 	std::cerr << "\nTotal time elapsed = " << std::chrono::duration_cast<std::chrono::seconds>(end - begin).count() << "s\n" << std::endl;
 	std::cerr << "\nDone.\n";
+	std::cerr << "\n";
+	mesh.get()->printHitTriangles();
 }

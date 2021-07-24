@@ -6,6 +6,7 @@ bool Triangle::hit(const Ray& r, double t_min, double t_max, hit_record& rec) co
 	// However, for now it does the job
 	/*if (!box.hit(r, t_min, t_max))
 		return false;*/
+	*hasBeenTested = true;
 
 	// Return if ray is parallel with triangle
 	if (dot(normal, r.direction()) == 0) {
@@ -32,14 +33,16 @@ bool Triangle::hit(const Ray& r, double t_min, double t_max, hit_record& rec) co
 	float testTwo = dot(cross(v2->pos - v1->pos,
 		intersectionPoint - v1->pos),
 		normal);
-	if (testTwo < 0)
+	if (testTwo < 0) {
 		return false;
+	}
 
 	float testThree = dot(cross(v0->pos - v2->pos,
 		intersectionPoint - v2->pos),
 		normal);
-	if (testThree < 0)
+	if (testThree < 0) {
 		return false;
+	}
 
 	// Compute barycentric coords
 	Vec3 w = get_triangle_barycentric(intersectionPoint);
@@ -58,7 +61,8 @@ bool Triangle::hit(const Ray& r, double t_min, double t_max, hit_record& rec) co
 	else {
 		rec.set_face_normal(r, normal);
 	}
-
+	
+	*hasBeenHit = true;
 	return true;
 }
 

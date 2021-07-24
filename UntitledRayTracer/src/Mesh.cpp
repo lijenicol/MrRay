@@ -1,6 +1,5 @@
 #include "Mesh.h"
 #include "HittableList.h"
-#include "Triangle.h"
 #include <sstream>
 #include <fstream>
 
@@ -30,15 +29,15 @@ std::vector<std::string> splitString(std::string s, char delimeter) {
 Mesh::Mesh(std::string filename, double scale, const bool smooth_shading, std::shared_ptr<Material> mat) 
 	: smooth_shading(smooth_shading), mat(mat), scale(scale) {
 	std::cerr << "Loading Mesh: " << filename << "\n";
-	HittableList triangles;
+	HittableList trianglesHL;
 
 	std::vector<Vec3> triangleIndices;
-	std::vector<Vec3> normalIndices;
 	std::vector<Vec3> texCoordIndices;
+	std::vector<Vec3> normalIndices;
 
-	std::vector<Vec3> inputNormals;
 	std::vector<Vec3> inputPoints;
 	std::vector<Vec3> inputTexCoords;
+	std::vector<Vec3> inputNormals;
 
 	std::ifstream objStream(filename);
 	std::string line;
@@ -91,11 +90,11 @@ Mesh::Mesh(std::string filename, double scale, const bool smooth_shading, std::s
 				// Extract all index info from the line
 				for (int vertexIndex = 0; vertexIndex < 3; vertexIndex++) {
 					auto vertexInfo = splitString(parts[vertexIndex + 1], '/');
-					triangle.e[vertexIndex] = std::stoi(vertexInfo[0]) - 1;
+					triangle.e[vertexIndex] = std::stod(vertexInfo[0]) - 1;
 					if (vertexInfo[1] != "") {
-						texCoordIndex.e[vertexIndex] = std::stoi(vertexInfo[1]) - 1;
+						texCoordIndex.e[vertexIndex] = std::stod(vertexInfo[1]) - 1;
 					}
-					normalIndex.e[vertexIndex] = std::stoi(vertexInfo[2]) - 1;
+					normalIndex.e[vertexIndex] = std::stod(vertexInfo[2]) - 1;
 				}
 
 				triangleIndices.push_back(triangle);
@@ -138,15 +137,94 @@ Mesh::Mesh(std::string filename, double scale, const bool smooth_shading, std::s
 
 		// Construct a triangle. If normals aren't specified, never use 
 		// smooth shading (this is a bit of a hack)
-		triangles.add(std::make_shared<Triangle>(v0,v1,v2, mat, 
-			inputNormals.size() != 0 ? smooth_shading : false));
+		std::shared_ptr<Triangle> tri = std::make_shared<Triangle>(v0, v1, v2, mat,
+			inputNormals.size() != 0 ? smooth_shading : false);
+		trianglesHL.add(tri);
+		triangles.push_back(tri);
 	}
-	std::cerr << "Mesh Construction Completed\n";
-	std::cerr << "Creating BVH.\n";
+
+	// Set metadata
+	vertexCount = inputPoints.size();
+	faceCount = triangleIndices.size();
 
 	// This will need to change if animation is added
-	container = new BVHNode(triangles, 0, 0);
+	std::cerr << "Creating BVH.\n";
+	container = new BVHNode(trianglesHL, 0, 0);
 	std::cerr << "Mesh Loaded Successfully\n\n";
+}
+
+void Mesh::print(bool verbose) {
+	std::cerr << "NUMBER OF VERTICES: " << vertexCount << std::endl;
+	std::cerr << "NUMBER OF FACES: " << faceCount << "\n\n";
+
+	if (verbose) {
+		for (int i = 0; i < faceCount; i++) {
+			// Print triangle number
+			std::cerr << "TRIANGLE ID: " << i << std::endl;
+			std::cerr << "NORMAL: " << triangles[i].get()->normal << "\n\n";
+		}
+	}
+}
+
+void Mesh::printHitTriangles() {
+	std::vector<int> hitList;
+	std::vector<int> noHitList;
+	std::vector<int> testedList;
+	std::vector<int> notTestedList;
+
+	for (int i = 0; i < triangles.size(); i++) {
+		// Put IDs in hit list
+		if (*(triangles[i].get()->hasBeenHit))
+			hitList.push_back(i);
+		else
+			noHitList.push_back(i);
+
+		// Put IDs in tested list
+		if (*(triangles[i].get()->hasBeenTested))
+			testedList.push_back(i);
+		else
+			notTestedList.push_back(i);
+	}
+
+	// Print tested list
+	if (testedList.size() > 0) {
+		std::cerr << "TESTED LIST" << std::endl;
+		std::cerr << testedList[0];
+		for (int i = 1; i < testedList.size(); i++) {
+			std::cerr << ", " << testedList[i];
+		}
+		std::cerr << "\n\n";
+	}
+
+	// Print not tested list
+	if (notTestedList.size() > 0) {
+		std::cerr << "NOT TESTED LIST" << std::endl;
+		std::cerr << notTestedList[0];
+		for (int i = 1; i < notTestedList.size(); i++) {
+			std::cerr << ", " << notTestedList[i];
+		}
+		std::cerr << "\n\n";
+	}
+
+	// Print hit list
+	if (hitList.size() > 0) {
+		std::cerr << "HIT LIST" << std::endl;
+		std::cerr << hitList[0];
+		for (int i = 1; i < hitList.size(); i++) {
+			std::cerr << ", " << hitList[i];
+		}
+		std::cerr << "\n\n";
+	}
+
+	// Print no hit list
+	if (noHitList.size() > 0) {
+		std::cerr << "NO HIT LIST" << std::endl;
+		std::cerr << noHitList[0];
+		for (int i = 1; i < noHitList.size(); i++) {
+			std::cerr << ", " << noHitList[i];
+		}
+		std::cerr << std::endl;
+	}
 }
 
 // Test hit by intersecting the mesh container
