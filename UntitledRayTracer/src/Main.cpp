@@ -12,6 +12,7 @@
 #include "Metal.h"
 #include "Dialectric.h"
 #include "DiffuseLight.h"
+#include "Triangle.h"
 #include "Mesh.h"
 #include "Transform.h"
 #include <iostream>
@@ -118,20 +119,23 @@ HittableList testScene() {
 	std::shared_ptr<Metal> metal = std::make_shared<Metal>(Colour(.4, .4, .4), 0.5);
 	std::shared_ptr<DiffuseLight> light = std::make_shared<DiffuseLight>(Colour(5, 5, 5));
 	std::shared_ptr<Dialectric> glass = std::make_shared<Dialectric>(1.1);
-	std::shared_ptr<Lambertian> white = std::make_shared<Lambertian>(Colour(.73, .73, .73));
+	std::shared_ptr<Lambertian> white = std::make_shared<Lambertian>(Colour(.72, .77, .77));
 	std::shared_ptr<Lambertian> image_mat = std::make_shared<Lambertian>(image_texture);
 
 	// Objects
 	HittableList objects;
-	objects.add(std::make_shared<XZRect>(-3, 3, -3, 3, 6, light));
-	objects.add(std::make_shared<XZRect>(-8, 8, -8, 8, 0, white));
-	//objects.add(std::make_shared<YZRect>(-8, 8, -8, 8, -8, white));
-	//objects.add(std::make_shared<XYRect>(-8, 8, -8, 8, 8, white));
-	//objects.add(std::make_shared<Mesh>("models/snowglobe_base.obj", Vec3(0,0,0), red));
-	objects.add(std::make_shared<Mesh>("models/snowglobe_innerglass.obj", 1.0, true, image_mat));
-	objects.add(std::make_shared<Mesh>("models/snowglobe_outerglass.obj", 1.0, true, glass));
-	objects.add(std::make_shared<Mesh>("models/dragon.obj", 1.0, true, glass));
+	//objects.add(std::make_shared<XZRect>(-3, 3, -3, 3, 6, light));
+	objects.add(std::make_shared<Mesh>("models/snowglobe_innerglass.obj", 0.8, false, image_mat));
 
+	// Test ccw triangle intersections to find where we are going wrong
+	/*auto v0 = std::make_shared<vertex_triangle>();
+	auto v1 = std::make_shared<vertex_triangle>();
+	auto v2 = std::make_shared<vertex_triangle>();
+
+	v0->pos = Vec3(0,0,0);
+	v1->pos = Vec3(1,0,0);
+	v2->pos = Vec3(0,1,0);
+	objects.add(std::make_shared<Triangle>(v0, v2, v1, red, false));*/
 
 	return objects;
 }
@@ -174,11 +178,11 @@ int main() {
 	
 	// Image properties
 
-	const double aspect_ratio = 2.0/3.0;
-	const int image_width = 1500;
+	const double aspect_ratio = 1.0;
+	const int image_width = 800;
 	const int image_height = (int)(image_width / aspect_ratio);
-	const int samples_per_pixel = 400;
-	const int max_depth = 14;
+	const int samples_per_pixel = 5;
+	const int max_depth = 5;
 
 	// Camera
 
@@ -191,7 +195,7 @@ int main() {
 	HittableList world;
 	std::shared_ptr<Texture> sb_tex;
 
-	switch (3) {
+	switch (2) {
 		// Cornell box setup
 		case 1:
 			lookFrom = Point3(278, 278, -800);
@@ -203,10 +207,10 @@ int main() {
 			break;
 		// Test setup
 		case 2:
-			lookFrom = Point3(-5.75, 1.8, 2.7);
-			lookAt = Point3(0, 0, 0);
+			lookFrom = Point3(0, 1, 2.7);
+			lookAt = Point3(0, 0.5, 0);
 			world = testScene();
-			sb_tex = std::make_shared<SolidColour>(0., 0., 0.);
+			sb_tex = std::make_shared<SolidColour>(0.5, 0.5, 0.5);
 			break;
 		case 3:
 			lookFrom = Point3(15, 8, 15);
@@ -234,9 +238,11 @@ int main() {
 	// Render
 
 	// Set up the ppm file headers
-	//std::cout << "# Samples Per Pixel: " << samples_per_pixel << "\n";
-	//std::cout << "# Ray Depth: " << max_depth << "\n";
 	std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
+	
+	// Place some metadata in the ppm
+	std::cout << "# Samples Per Pixel: " << samples_per_pixel << "\n";
+	std::cout << "# Ray Depth: " << max_depth << "\n";
 
 	// Point this to an object if you want to test AABB
 	std::shared_ptr<Hittable> test_object = 0;

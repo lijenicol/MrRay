@@ -1,19 +1,28 @@
 #include "BVHNode.h"
 #include <algorithm>
 
-BVHNode::BVHNode(std::vector<std::shared_ptr<Hittable>>& objects, size_t start, size_t end, double time0, double time1, int depth, int *sorted_counter) {
+void printBVHProgress(int sortedCount, int totalCount) {
+	int percent_done = (100.0f * (float)((float)sortedCount / totalCount));
+	if (percent_done % 10 == 0) {
+		std::cerr << "\rBVH Construction " << percent_done << "% Complete" << std::flush;
+	}
+}
+
+BVHNode::BVHNode(std::vector<std::shared_ptr<Hittable>>& objects, size_t start, size_t end, double time0, double time1, int depth, int &sorted_counter) {
 	// Choose axis for split
 	int axis = random_int(0, 2);
 	auto comparator = (axis == 0) ? box_x_compare
-				 : (axis == 1) ? box_y_compare
-			                   : box_z_compare;
+				    : (axis == 1) ? box_y_compare
+			                      : box_z_compare;
 
 	size_t object_span = end - start;
 
 	if (object_span == 1) {
 		left = objects[start];
 		right = NULL;
-		*sorted_counter += 1;
+
+		sorted_counter += 1;
+		printBVHProgress(sorted_counter, objects.size());
 	}
 	else if (object_span == 2) {
 		// Figure which object goes either side of the split
@@ -25,12 +34,9 @@ BVHNode::BVHNode(std::vector<std::shared_ptr<Hittable>>& objects, size_t start, 
 			left = objects[start + 1];
 			right = objects[start];
 		}
-		*sorted_counter += 2;
 
-		int percent_done = (100.0f * (float)((float)*sorted_counter / objects.size()));
-		if (percent_done % 10 == 0) {
-			std::cerr << "\rBVH Construction " << percent_done << "% Complete" << std::flush;
-		}
+		sorted_counter += 2;
+		printBVHProgress(sorted_counter, objects.size());
 	}
 	else {
 		// Sort objects along axis

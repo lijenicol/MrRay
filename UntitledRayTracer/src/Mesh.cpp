@@ -4,8 +4,31 @@
 #include <sstream>
 #include <fstream>
 
+// Split a string into multiple pieces at delimeter points
+std::vector<std::string> splitString(std::string s, char delimeter) {
+	std::vector<std::string> splits;
+
+	// Find occurence of white space and split
+	size_t pos;
+	while ((pos = s.find(delimeter)) != std::string::npos) {
+		// Push empty string if delim occurs right away
+		if (pos == 0) {
+			splits.push_back("");
+		}
+		
+		std::string token = s.substr(0, pos);
+		s.erase(0, pos + 1);
+		splits.push_back(token);
+	}
+
+	// Add the last part of the string
+	splits.push_back(s);
+	return splits;
+}
+
 // Setup triangles and BVH structure
-Mesh::Mesh(std::string filename, double scale, const bool smooth_shading, std::shared_ptr<Material> mat) : smooth_shading(smooth_shading), mat(mat), scale(scale) {
+Mesh::Mesh(std::string filename, double scale, const bool smooth_shading, std::shared_ptr<Material> mat) 
+	: smooth_shading(smooth_shading), mat(mat), scale(scale) {
 	std::cerr << "Loading Mesh: " << filename << "\n";
 	HittableList triangles;
 
@@ -16,92 +39,64 @@ Mesh::Mesh(std::string filename, double scale, const bool smooth_shading, std::s
 	std::vector<Vec3> inputNormals;
 	std::vector<Vec3> inputPoints;
 	std::vector<Vec3> inputTexCoords;
+
 	std::ifstream objStream(filename);
 	std::string line;
 	if (objStream.is_open()) {
-		//go through every line of the obj file
 		while (getline(objStream, line)) {
-			std::stringstream ss;
-			ss << line;
+			// Split string
+			auto parts = splitString(line, ' ');
 
-			//check for vertex label
-			std::string label;
-			ss >> label;
-			if (label == "v") {
+			// Parse vertices
+			if (parts[0] == "v") {
 				//construct a point from the line
 				Vec3 point;
-				ss >> point.e[0];
-				ss >> point.e[1];
-				ss >> point.e[2];
+				point.e[0] = std::stod(parts[1]);
+				point.e[1] = std::stod(parts[2]);
+				point.e[2] = std::stod(parts[3]);
 
 				//push the point to the point list
 				inputPoints.push_back(point);
 			}
-			if (label == "vn") {
+
+			// Parse normals
+			if (parts[0] == "vn") {
 				Vec3 normal;
-				ss >> normal.e[0];
-				ss >> normal.e[1];
-				ss >> normal.e[2];
+				normal.e[0] = std::stod(parts[1]);
+				normal.e[1] = std::stod(parts[2]);
+				normal.e[2] = std::stod(parts[3]);
 
 				//push the normal to the normals list
 				inputNormals.push_back(normal);
 			}
-			if (label == "vt") {
+
+			// Parse texture coords
+			if (parts[0] == "vt") {
 				Vec3 texCoord;
-				ss >> texCoord.e[0];
-				ss >> texCoord.e[1];
+				texCoord.e[0] = std::stod(parts[1]);
+				texCoord.e[1] = std::stod(parts[2]);
 
 				//push the coord to the texcoords list
 				inputTexCoords.push_back(texCoord);
 			}
-			if (label == "f") {
+
+			// Parse faces
+			if (parts[0] == "f") {
+				// Faces are made up of a vertex index, texture coord
+				// index, and also a normal index.
 				Vec3 triangle;
 				Vec3 normalIndex;
 				Vec3 texCoordIndex;
-				std::string s;
-				int pos;
-				std::string v;
-				std::string u;
 
-				//search face for / delimeter
-				ss >> s;
-				pos = s.find("/");
-				v = s.substr(0, pos);
-				triangle.e[0] = std::stoi(v) - 1;
-				s.erase(0, pos + 1);
-				pos = s.find("/");
-				u = s.substr(0, pos);
-				if (u.length() != 0) {
-					texCoordIndex.e[0] = std::stoi(u) - 1;
+				// Extract all index info from the line
+				for (int vertexIndex = 0; vertexIndex < 3; vertexIndex++) {
+					auto vertexInfo = splitString(parts[vertexIndex + 1], '/');
+					triangle.e[vertexIndex] = std::stoi(vertexInfo[0]) - 1;
+					if (vertexInfo[1] != "") {
+						texCoordIndex.e[vertexIndex] = std::stoi(vertexInfo[1]) - 1;
+					}
+					normalIndex.e[vertexIndex] = std::stoi(vertexInfo[2]) - 1;
 				}
-				s.erase(0, pos + 1);
-				normalIndex.e[0] = std::stoi(s) - 1;
-
-				ss >> s;
-				pos = s.find("/");
-				v = s.substr(0, pos);
-				triangle.e[1] = std::stoi(v) - 1;
-				s.erase(0, pos + 1);
-				pos = s.find("/");
-				u = s.substr(0, pos);
-				if (u.length() != 0) {
-					texCoordIndex.e[1] = std::stoi(u) - 1;
-				}
-				s.erase(0, pos + 1);
-				normalIndex.e[1] = std::stoi(s) - 1;
-
-				ss >> s;
-				pos = s.find("/");
-				v = s.substr(0, pos);
-				triangle.e[2] = std::stoi(v) - 1;
-				s.erase(0, pos + 1);
-				pos = s.find("/");
-				u = s.substr(0, pos);
-				if (u.length() != 0) {
-					texCoordIndex.e[2] = std::stoi(u) - 1;
-				}
-				s.erase(0, pos + 1);
-				normalIndex.e[2] = std::stoi(s) - 1;
 
 				triangleIndices.push_back(triangle);
 				normalIndices.push_back(normalIndex);
@@ -111,7 +106,8 @@ Mesh::Mesh(std::string filename, double scale, const bool smooth_shading, std::s
 		objStream.close();
 	}
 	else {
-		std::cout << "File cannot be read or does not exist: " << filename;
+		std::cerr << "File cannot be read or does not exist: " << filename << "\n";
+		exit(EXIT_FAILURE);
 	}
 
 	// Construct triangle instances from indices and scale vertices
@@ -142,8 +138,8 @@ Mesh::Mesh(std::string filename, double scale, const bool smooth_shading, std::s
 
 		// Construct a triangle. If normals aren't specified, never use 
 		// smooth shading (this is a bit of a hack)
-		triangles.add(std::make_shared<Triangle>(v0,v1,v2, mat
-			, inputNormals.size() != 0 ? smooth_shading : false));
+		triangles.add(std::make_shared<Triangle>(v0,v1,v2, mat, 
+			inputNormals.size() != 0 ? smooth_shading : false));
 	}
 	std::cerr << "Mesh Construction Completed\n";
 	std::cerr << "Creating BVH.\n";

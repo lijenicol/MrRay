@@ -26,7 +26,7 @@ class Triangle : public Hittable
 				: mat(mat), v0(v0), v1(v1), v2(v2), smooth_shading(smooth_shading) {
 			normal = unit_vector(cross(v1->pos - v0->pos, v2->pos - v0->pos));
 
-			// calculate min/max x
+			// Calculate bounding box once 
 			Point3 a(
 				fmin(fmin(v0->pos.e[0], v1->pos.e[0]), v2->pos.e[0]),
 				fmin(fmin(v0->pos.e[1], v1->pos.e[1]), v2->pos.e[1]),

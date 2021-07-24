@@ -7,12 +7,12 @@ bool Triangle::hit(const Ray& r, double t_min, double t_max, hit_record& rec) co
 	/*if (!box.hit(r, t_min, t_max))
 		return false;*/
 
-	//return if ray is parallel with triangle
+	// Return if ray is parallel with triangle
 	if (dot(normal, r.direction()) == 0) {
 		return false;
 	}
 
-	//calculate plane intersection
+	// Calculate plane intersection
 	float d = dot(normal, v0->pos);
 	float t = (d - dot(normal, r.origin())) / dot(normal, r.direction());
 	Point3 intersectionPoint = r.origin() + t * r.direction();
@@ -21,12 +21,13 @@ bool Triangle::hit(const Ray& r, double t_min, double t_max, hit_record& rec) co
 	if (t > t_max || t < t_min)
 		return false;
 
-	//calculate if intersection point is within triangle
+	// Calculate if intersection point is within triangle
 	float testOne = dot(cross(v1->pos - v0->pos,
 		intersectionPoint - v0->pos),
 		normal);
-	if (testOne < 0)
+	if (testOne < 0) {
 		return false;
+	}
 
 	float testTwo = dot(cross(v2->pos - v1->pos,
 		intersectionPoint - v1->pos),
@@ -40,14 +41,13 @@ bool Triangle::hit(const Ray& r, double t_min, double t_max, hit_record& rec) co
 	if (testThree < 0)
 		return false;
 
-	// Compute barycentric weights
-	Vec3 w;
-	w = get_triangle_barycentric(rec.p);
+	// Compute barycentric coords
+	Vec3 w = get_triangle_barycentric(intersectionPoint);
 
 	// Set hit record
 	rec.t = t;
 	rec.p = intersectionPoint;
-	get_triangle_uv(rec.p, rec.u, rec.v);
+	get_triangle_uv(w, rec.u, rec.v);
 	rec.mat = mat;
 
 	// If smooth shading then use interpolated normals
