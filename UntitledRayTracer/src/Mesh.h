@@ -11,7 +11,7 @@
 
 class Mesh : public Hittable {
 public:
-	BVHNode* container;
+	Hittable* container;
 	std::vector<std::shared_ptr<Triangle>> triangles;
 	bool smooth_shading;
 	std::shared_ptr<Material> mat;
