@@ -12,7 +12,7 @@ public:
 	virtual bool scatter(const Ray& r_in, const hit_record& rec, Colour& attenuation, Ray& scattered) const override {
 		Vec3 scattered_direction = rec.normal + random_unit_vector();
 		scattered = Ray(rec.p, scattered_direction);
-		attenuation = albedo->value(rec.u, rec.v, rec.p);
+		attenuation = albedo->value(rec.u, rec.v, rec);
 		return true;
 	}
 };

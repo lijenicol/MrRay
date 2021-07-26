@@ -31,7 +31,7 @@ Colour ray_colour(const Ray& r, std::shared_ptr<Texture> background, const Hitta
 		// Compute u,v of hit
 		double u, v;
 		Sphere::get_sphere_uv(unit_vector(r.direction()), u, v);
-		return background->value(u,v,r.origin());
+		return background->value(u,v,rec);
 	}
 
 	Ray scattered;
@@ -122,12 +122,23 @@ HittableList testScene() {
 	std::shared_ptr<Lambertian> white = std::make_shared<Lambertian>(Colour(.72, .77, .77));
 	std::shared_ptr<Lambertian> image_mat = std::make_shared<Lambertian>(image_texture);
 
+	std::shared_ptr<NormalTexture> normal_texture = std::make_shared<NormalTexture>();
+	std::shared_ptr<Lambertian> normal_mat = std::make_shared<Lambertian>(normal_texture);
+
+	std::shared_ptr<CheckerTexture> checker = std::make_shared<CheckerTexture>(Colour(1,1,1), Colour(0.1,0.1,0.1));
+	std::shared_ptr<Lambertian> checker_mat = std::make_shared<Lambertian>(checker);
+	
 	// Objects
 	HittableList objects;
 	//objects.add(std::make_shared<XZRect>(-3, 3, -3, 3, 6, light));
-	std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>("models/hood_greek.obj", 0.1, false, image_mat);
-	objects.add(mesh);
-	mesh.get()->print(true);
+	//std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>("models/greek.obj", 0.5, false, red);
+	std::shared_ptr<Sphere> sphere = std::make_shared<Sphere>(Vec3(0,0,0), 0.5, normal_mat);
+	objects.add(std::make_shared<Transform>(sphere, Vec3(0, 0, 0), Vec3(0, 0, 0), Vec3(1.0, 0.5, 1.0)));
+	objects.add(std::make_shared<Transform>(sphere, Vec3(0, 0.4, 0), Vec3(0, 0, 0), Vec3(1.0, 0.5, 1.0)));
+	objects.add(std::make_shared<Transform>(sphere, Vec3(0, 0.8, 0), Vec3(0, 0, 0), Vec3(1.0, 0.5, 1.0)));
+	//objects.add(std::make_shared<Transform>(sphere, Vec3(1, 0, 0), Vec3(0, 0, 0), Vec3(1.0, 1.0, 1.0)));
+	//objects.add(std::make_shared<Transform>(mesh, Vec3(0.5, 0.2, 0), Vec3(-20, 10, 0), Vec3(1.0, 1.0, 1.0)));
+	// objects.add(sphere);
 
 	// Test ccw triangle intersections to find where we are going wrong
 	/*auto v0 = std::make_shared<vertex_triangle>();
@@ -158,8 +169,8 @@ HittableList testSky() {
 	// Objects
 	HittableList objects;
 	//objects.add(std::make_shared<XZRect>(-3, 3, -3, 3, 6, light));
-	objects.add(std::make_shared<Translate>(obj, Vec3(0, 1, 25)));
-	objects.add(std::make_shared<Translate>(obj2, Vec3(0, -0.5, 0)));
+	/*objects.add(std::make_shared<Translate>(obj, Vec3(0, 1, 25)));
+	objects.add(std::make_shared<Translate>(obj2, Vec3(0, -0.5, 0)));*/
 	objects.add(std::make_shared<XZRect>(-2000, 2000, -2000, 2000, -0.5, white));
 
 	// RGB Spheres
@@ -195,18 +206,6 @@ int main() {
 	HittableList world;
 	std::shared_ptr<Texture> sb_tex;
 
-	// Texture
-	std::shared_ptr<ImageTexture> image_texture = std::make_shared<ImageTexture>("images/snowglobe.png");
-
-	// Materials
-	std::shared_ptr<Lambertian> white = std::make_shared<Lambertian>(Colour(.72, .77, .77));
-	std::shared_ptr<Lambertian> image_mat = std::make_shared<Lambertian>(image_texture);
-
-	// Objects
-	std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>("models/hood_greek.obj", 0.1, false, image_mat);
-	world.add(mesh);
-	mesh.get()->print(true);
-
 	switch (2) {
 		// Cornell box setup
 		case 1:
@@ -221,7 +220,7 @@ int main() {
 		case 2:
 			lookFrom = Point3(0, 1, 2.7);
 			lookAt = Point3(0, 0.5, 0);
-			// world = testScene();
+			world = testScene();
 			sb_tex = std::make_shared<SolidColour>(0.5, 0.5, 0.5);
 			break;
 		case 3:
@@ -301,5 +300,4 @@ int main() {
 	std::cerr << "\nTotal time elapsed = " << std::chrono::duration_cast<std::chrono::seconds>(end - begin).count() << "s\n" << std::endl;
 	std::cerr << "\nDone.\n";
 	std::cerr << "\n";
-	mesh.get()->printHitTriangles();
 }
