@@ -127,8 +127,8 @@ bool Transform::bounding_box(double time0, double time1, AABB& output_box) const
 				auto y = j * output_box.max.y() + (1.0 - j) * output_box.min.y();
 				auto z = k * output_box.max.z() + (1.0 - k) * output_box.min.z();
 
-				// Scale, rotate, translate
-				Vec3 tester = rotatePoint(Vec3(x, y, z) * scale, rotation) + offset;
+				// Rotate the point for testing
+				Vec3 tester = rotatePoint(Vec3(x, y, z), rotation);
 
 				// Update bounding box
 				for (int c = 0; c < 3; c++) {
@@ -139,10 +139,10 @@ bool Transform::bounding_box(double time0, double time1, AABB& output_box) const
 		}
 	}
 	
-	// Set and move bounding box
+	// Scale and move bounding box
 	output_box = AABB(
-		min + offset,
-		max + offset
+		min * scale + offset,
+		max * scale + offset
 	);
 
 	return true;
