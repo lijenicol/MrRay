@@ -222,9 +222,10 @@ HittableList testSky() {
 }
 
 void threadTest(int offset, int height, int image_width, int image_height, int samples_per_pixel, const Camera& cam,
-		std::shared_ptr<Texture> sb_tex, const Hittable& world, std::shared_ptr<Hittable> lights, int max_depth, std::vector<Colour>& output) {
+		std::shared_ptr<Texture> sb_tex, const Hittable& world, std::shared_ptr<Hittable> lights, int max_depth, std::vector<Colour>& output, int& progress) {
 	for (int j = offset + height - 1; j >= offset; j--) {
-		std::cerr << "\rScanlines remaining: " << j << ' ' << std::flush;
+		//std::cerr << "\rScanlines remaining: " << j << ' ' << std::flush;
+		progress = j - offset;
 		for (int i = 0; i < image_width; i++) {
 			Colour pixel_colour(0, 0, 0);
 			for (int s = 0; s < samples_per_pixel; s++) {
@@ -236,6 +237,39 @@ void threadTest(int offset, int height, int image_width, int image_height, int s
 			//write_colour(std::cout, pixel_colour / samples_per_pixel);
 			output.push_back(pixel_colour / samples_per_pixel);
 		}
+	}
+}
+
+void printProgressOfThreads(int* progresses, int count) {
+	while (true) {
+		// Determine whether or not we should break after
+		// we print the next statement
+		bool cancel = true;
+		for (int i = 0; i < count; i++) {
+			if (progresses[i] > 0) {
+				cancel = false;
+				break;
+			}
+		}
+		
+		// Print progress
+		std::cerr << "\r";
+		if (progresses[0] == 0)
+			std::cerr << "DONE";
+		else
+			std::cerr << progresses[0];
+
+		for (int i = 1; i < count; i++) {
+			if (progresses[i] == 0)
+				std::cerr << "..." << "DONE";
+			else
+				std::cerr << "..." << progresses[i];
+		}
+		std::cerr << std::flush;
+
+		// Break if we need
+		if (cancel)
+			break;
 	}
 }
 
@@ -316,9 +350,10 @@ int main() {
 	// Point this to an object if you want to test AABB
 	std::shared_ptr<Hittable> test_object = 0;
 
-	const int THREAD_COUNT = 12;
-	std::vector<Colour> scanlineParts[THREAD_COUNT];
+	const int THREAD_COUNT = 10;
 	std::thread threads[THREAD_COUNT];
+	std::vector<Colour> scanlineParts[THREAD_COUNT];
+	int threadProgresses[THREAD_COUNT];
 	int scanlineHeight = image_height / THREAD_COUNT;
 	
 	// Spawn threads
@@ -327,14 +362,17 @@ int main() {
 		// so we need to account for that here
 		if (i == THREAD_COUNT - 1 && scanlineHeight * (i + 1) != image_height) {
 			threads[i] = std::thread(threadTest, scanlineHeight * i, image_height - scanlineHeight * i, image_width, image_height,
-				samples_per_pixel, std::ref(cam), sb_tex, std::ref(world), lights, max_depth, std::ref(scanlineParts[i]));
+				samples_per_pixel, std::ref(cam), sb_tex, std::ref(world), lights, max_depth, std::ref(scanlineParts[i]), std::ref(threadProgresses[i]));
 			continue;
 		}
 
 		// Spawn thread normally
 		threads[i] = std::thread(threadTest, scanlineHeight * i, scanlineHeight, image_width, image_height,
-			samples_per_pixel, std::ref(cam), sb_tex, std::ref(world), lights, max_depth, std::ref(scanlineParts[i]));
+			samples_per_pixel, std::ref(cam), sb_tex, std::ref(world), lights, max_depth, std::ref(scanlineParts[i]), std::ref(threadProgresses[i]));
 	}
+
+	// Spawn progress thread (for logging progress)
+	std::thread progressThread(printProgressOfThreads, threadProgresses, THREAD_COUNT);
 
 	// Join threads
 	for (int i = 0; i < THREAD_COUNT; i++) {
@@ -347,6 +385,9 @@ int main() {
 			write_colour(std::cout, scanlineParts[j][i]);
 		}
 	}
+
+	// Wait til progress thread is done (it should be at this point)
+	progressThread.join();
 
 	// End Clock
 	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
