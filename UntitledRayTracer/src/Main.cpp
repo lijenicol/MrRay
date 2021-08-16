@@ -18,6 +18,7 @@
 #include "PDF.h"
 #include <iostream>
 #include <chrono>
+#include <thread>
 
 // Recursive function for calculating intersections and colour
 Colour ray_colour(const Ray& r, std::shared_ptr<Texture> background, const Hittable& world, std::shared_ptr<Hittable> lights, int depth) {	
@@ -220,6 +221,24 @@ HittableList testSky() {
 	return objects;
 }
 
+void threadTest(int offset, int height, int image_width, int image_height, int samples_per_pixel, const Camera& cam,
+		std::shared_ptr<Texture> sb_tex, const Hittable& world, std::shared_ptr<Hittable> lights, int max_depth, std::vector<Colour>& output) {
+	for (int j = offset + height - 1; j >= offset; j--) {
+		std::cerr << "\rScanlines remaining: " << j << ' ' << std::flush;
+		for (int i = 0; i < image_width; i++) {
+			Colour pixel_colour(0, 0, 0);
+			for (int s = 0; s < samples_per_pixel; s++) {
+				double u = (i + random_double()) / (image_width - 1.0);
+				double v = (j + random_double()) / (image_height - 1.0);
+				Ray r = cam.get_ray(u, v);
+				pixel_colour += ray_colour(r, sb_tex, world, lights, max_depth);
+			}
+			//write_colour(std::cout, pixel_colour / samples_per_pixel);
+			output.push_back(pixel_colour / samples_per_pixel);
+		}
+	}
+}
+
 int main() {
 
 	// Start clock
@@ -227,9 +246,9 @@ int main() {
 	
 	// Image properties
 	const double aspect_ratio = 1.0;
-	const int image_width = 800;
+	const int image_width = 400;
 	const int image_height = (int)(image_width / aspect_ratio);
-	const int samples_per_pixel = 600;
+	const int samples_per_pixel = 20;
 	const int max_depth = 5;
 
 	// Camera
@@ -297,39 +316,35 @@ int main() {
 	// Point this to an object if you want to test AABB
 	std::shared_ptr<Hittable> test_object = 0;
 
-	// Generate image
-	// Note how j goes in reverse order - this is so scans go from bot to top
-	for (int j = image_height-1; j >= 0; j--) {
-		std::cerr << "\rScanlines remaining: " << j << ' ' << std::flush;
-		for (int i = 0; i < image_width; i++) {
-			// Debug AABB
-			if (test_object != NULL) {
-				double u = (i) / (image_width - 1.0);
-				double v = (j) / (image_height - 1.0);
-				Ray r = cam.get_ray(u, v);
-				Colour pixel_colour = aabb_test(r, test_object);
-				write_colour(std::cout, pixel_colour);
-				continue;
-			}
+	const int THREAD_COUNT = 12;
+	std::vector<Colour> scanlineParts[THREAD_COUNT];
+	std::thread threads[THREAD_COUNT];
+	int scanlineHeight = image_height / THREAD_COUNT;
+	
+	// Spawn threads
+	for (int i = 0; i < THREAD_COUNT; i++) {
+		// The last thread may have less scanlines due to some division errors
+		// so we need to account for that here
+		if (i == THREAD_COUNT - 1 && scanlineHeight * (i + 1) != image_height) {
+			threads[i] = std::thread(threadTest, scanlineHeight * i, image_height - scanlineHeight * i, image_width, image_height,
+				samples_per_pixel, std::ref(cam), sb_tex, std::ref(world), lights, max_depth, std::ref(scanlineParts[i]));
+			continue;
+		}
 
-			// Don't randomize ray direction if samples = 0
-			if (samples_per_pixel == 0) {
-				double u = (i) / (image_width - 1.0);
-				double v = (j) / (image_height - 1.0);
-				Ray r = cam.get_ray(u, v);
-				Colour pixel_colour = ray_colour(r, sb_tex, world, lights, max_depth);
-				write_colour(std::cout, pixel_colour);
-			}
-			else {
-				Colour pixel_colour(0, 0, 0);
-				for (int s = 0; s < samples_per_pixel; s++) {
-					double u = (i + random_double()) / (image_width - 1.0);
-					double v = (j + random_double()) / (image_height - 1.0);
-					Ray r = cam.get_ray(u, v);
-					pixel_colour += ray_colour(r, sb_tex, world, lights, max_depth);
-				}
-				write_colour(std::cout, pixel_colour / samples_per_pixel);
-			}
+		// Spawn thread normally
+		threads[i] = std::thread(threadTest, scanlineHeight * i, scanlineHeight, image_width, image_height,
+			samples_per_pixel, std::ref(cam), sb_tex, std::ref(world), lights, max_depth, std::ref(scanlineParts[i]));
+	}
+
+	// Join threads
+	for (int i = 0; i < THREAD_COUNT; i++) {
+		threads[i].join();
+	}
+
+	// Combine all the scanlines into one image
+	for (int j = THREAD_COUNT-1; j >= 0; j--) {
+		for (int i = 0; i < scanlineHeight * image_width; i++) {
+			write_colour(std::cout, scanlineParts[j][i]);
 		}
 	}
 
