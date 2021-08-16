@@ -162,6 +162,8 @@
     <ClInclude Include="src\Material.h" />
     <ClInclude Include="src\Mesh.h" />
     <ClInclude Include="src\Metal.h" />
+    <ClInclude Include="src\ONB.h" />
+    <ClInclude Include="src\PDF.h" />
     <ClInclude Include="src\rtutils.h" />
     <ClInclude Include="src\rt_stb_image.h" />
     <ClInclude Include="src\Sphere.h" />

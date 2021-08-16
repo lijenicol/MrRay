@@ -7,8 +7,9 @@ public:
 	double ref_idx;
 	Dialectric(double ri) : ref_idx(ri) {}
 
-	virtual bool scatter(const Ray& r_in, const hit_record& rec, Colour& attenuation, Ray& scattered) const override {
-		attenuation = Colour(1, 1, 1);
+	virtual bool scatter(const Ray& r_in, const hit_record& rec, scatter_record& srec) const override {
+		srec.attenuation = Colour(1, 1, 1);
+		srec.isSpecular = true;
 
 		// This value is the ratio of the refractive indexes (ri_in / ri_out)
 		// We use ri_in = 1 as a good approximation for air
@@ -21,7 +22,7 @@ public:
 		double sin_theta = sqrt(1 - cos_theta * cos_theta);
 		if (etai_over_etat * sin_theta > 1) {
 			Vec3 reflected = reflect(unit_direction, rec.normal);
-			scattered = Ray(rec.p, reflected);
+			srec.specularRay = Ray(rec.p, reflected);
 			return true;
 		}
 
@@ -29,13 +30,13 @@ public:
 		double reflect_prob = schlick(cos_theta, ref_idx);
 		if (random_double() < reflect_prob) {
 			Vec3 reflected = reflect(unit_direction, rec.normal);
-			scattered = Ray(rec.p, reflected);
+			srec.specularRay = Ray(rec.p, reflected);
 			return true;
 		}
 
 		// If not reflected then refract
 		Vec3 refracted = refract(unit_direction, rec.normal, etai_over_etat);
-		scattered = Ray(rec.p, refracted);
+		srec.specularRay = Ray(rec.p, refracted);
 		return true;
 	}
 };

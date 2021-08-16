@@ -15,15 +15,17 @@
 #include "Triangle.h"
 #include "Mesh.h"
 #include "Transform.h"
+#include "PDF.h"
 #include <iostream>
 #include <chrono>
 
 // Recursive function for calculating intersections and colour
-Colour ray_colour(const Ray& r, std::shared_ptr<Texture> background, const Hittable& world, int depth) {
+Colour ray_colour(const Ray& r, std::shared_ptr<Texture> background, const Hittable& world, std::shared_ptr<Hittable> lights, int depth) {	
 	// Base case for recursion (add no more colour)
-	if (depth <= 0) {
+	// NOTE: THIS IS COMMENTED OUT DUE TO RUSSIAN ROULETTE TERMINATION
+	/*if (depth <= 0) {
 		return Colour(0, 0, 0);
-	}
+	}*/
 
 	// If the ray hits nothing, return the skybox colour
 	hit_record rec;
@@ -34,14 +36,48 @@ Colour ray_colour(const Ray& r, std::shared_ptr<Texture> background, const Hitta
 		return background->value(u,v,rec);
 	}
 
-	Ray scattered;
-	Colour attenuation;
 	Colour emitted = rec.mat->emitted(0,0,Vec3(0,0,0));	// needs to change when u,v coordinates is implemented
-	if (!rec.mat->scatter(r, rec, attenuation, scattered))
+	scatter_record srec;
+	if (!rec.mat->scatter(r, rec, srec))
 		return emitted;
 
+	// Determine russian roulette termination
+	//float maxChannel = fmax(fmax(srec.attenuation[0], srec.attenuation[1]), srec.attenuation[2]);
+	//float pContinue = 1 - maxChannel;
+	float pContinue = 1 - (srec.attenuation.length() / sqrt(3));
+	pContinue = pContinue < 0 ? 0 : pContinue;
+	float invpContinue = 1 / (1 - pContinue);
+	float randomRussian = random_double();
+	if (randomRussian < pContinue) {
+		return Colour(0, 0, 0);
+	}
+
+	// If the generated ray is specular, then we do not need to sample directions
+	// (this is because the specular only has one possible scattering ray)
+	if (srec.isSpecular) {
+		/*return srec.attenuation * ray_colour(srec.specularRay, background, world, lights, depth - 1) 
+			* dot(rec.normal, srec.specularRay.direction()) * invpContinue;*/
+		return srec.attenuation * ray_colour(srec.specularRay, background, world, lights, depth - 1);
+	}
+
+	// Generate sample direction
+	double pdf = 0;
+	Ray scattered;
+	while (pdf == 0) {
+		std::shared_ptr<HittablePDF> lightPDF = std::make_shared<HittablePDF>(lights, rec.p);
+		MixturePDF mixPDF = MixturePDF(srec.PDF_ptr, lightPDF);
+		scattered = Ray(rec.p, mixPDF.generate());
+		pdf = mixPDF.value(scattered.direction());
+	}
+
 	// Recursively scatter rays
-	return emitted + attenuation * ray_colour(scattered, background, world, depth - 1);
+	/*return emitted + srec.attenuation * rec.mat->bsdf(r, rec, scattered) 
+		* dot(rec.normal, scattered.direction())
+		* ray_colour(scattered, background, world, lights, depth - 1) * invpContinue / pdf;*/
+	// std::cerr << srec.attenuation << std::endl;
+	return emitted + srec.attenuation * rec.mat->bsdf(r, rec, scattered)
+		* dot(rec.normal, scattered.direction())
+		* ray_colour(scattered, background, world, lights, depth - 1) * invpContinue / pdf;
 }
 
 // Renders an objects AABB for debug purposes
@@ -63,7 +99,7 @@ HittableList cornellBox() {
 	std::shared_ptr<Lambertian> red = std::make_shared<Lambertian>(Colour(.65, .05, .05));
 	std::shared_ptr<Lambertian> white = std::make_shared<Lambertian>(Colour(.73, .73, .73));
 	std::shared_ptr<Lambertian> green = std::make_shared<Lambertian>(Colour(.12, .45, .15));
-	std::shared_ptr<DiffuseLight> light = std::make_shared<DiffuseLight>(Colour(5, 5, 5));
+	std::shared_ptr<DiffuseLight> light = std::make_shared<DiffuseLight>(Colour(15.0, 15.0, 15.0));
 	std::shared_ptr<Dialectric> glass = std::make_shared<Dialectric>(1.5);
 	std::shared_ptr<Lambertian> image_mat = std::make_shared<Lambertian>(image_texture);
 
@@ -76,7 +112,7 @@ HittableList cornellBox() {
 	objects.add(std::make_shared<XYRect>(0, 555, 0, 555, 555, white));
 	objects.add(std::make_shared<XZRect>(163, 393, 177, 382, 554, light));
 	objects.add(std::make_shared<Sphere>(Vec3(278, 278, 278), 150, image_mat));
-	objects.add(std::make_shared<Sphere>(Vec3(278, 278, 278), 170, glass));
+	//objects.add(std::make_shared<Sphere>(Vec3(278, 278, 278), 170, glass));
 
 	return objects;
 }
@@ -193,7 +229,7 @@ int main() {
 	const double aspect_ratio = 1.0;
 	const int image_width = 800;
 	const int image_height = (int)(image_width / aspect_ratio);
-	const int samples_per_pixel = 5;
+	const int samples_per_pixel = 600;
 	const int max_depth = 5;
 
 	// Camera
@@ -205,8 +241,11 @@ int main() {
 	// World properties
 	HittableList world;
 	std::shared_ptr<Texture> sb_tex;
+	//objects.add(std::make_shared<XZRect>);
+	std::shared_ptr<DiffuseLight> lightmat = std::make_shared<DiffuseLight>(Colour(1, 1, 1));
+	std::shared_ptr<XZRect> lights = std::make_shared<XZRect>(163, 393, 177, 382, 554, lightmat);
 
-	switch (2) {
+	switch (1) {
 		// Cornell box setup
 		case 1:
 			lookFrom = Point3(278, 278, -800);
@@ -278,7 +317,7 @@ int main() {
 				double u = (i) / (image_width - 1.0);
 				double v = (j) / (image_height - 1.0);
 				Ray r = cam.get_ray(u, v);
-				Colour pixel_colour = ray_colour(r, sb_tex, world, max_depth);
+				Colour pixel_colour = ray_colour(r, sb_tex, world, lights, max_depth);
 				write_colour(std::cout, pixel_colour);
 			}
 			else {
@@ -287,7 +326,7 @@ int main() {
 					double u = (i + random_double()) / (image_width - 1.0);
 					double v = (j + random_double()) / (image_height - 1.0);
 					Ray r = cam.get_ray(u, v);
-					pixel_colour += ray_colour(r, sb_tex, world, max_depth);
+					pixel_colour += ray_colour(r, sb_tex, world, lights, max_depth);
 				}
 				write_colour(std::cout, pixel_colour / samples_per_pixel);
 			}

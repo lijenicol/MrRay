@@ -1,11 +1,25 @@
 #pragma once
 #include "rtutils.h"
+#include "PDF.h"
 
 struct hit_record;
 
+struct scatter_record {
+	Ray specularRay;
+	bool isSpecular;
+	Colour attenuation;
+	std::shared_ptr<PDF> PDF_ptr;
+};
+
 class Material {
 public:
-	virtual bool scatter(const Ray& r_in, const hit_record& rec, Colour& attenuation, Ray& scattered) const = 0;
+	virtual bool scatter(const Ray& r_in, const hit_record& rec, scatter_record& srec) const {
+		return false;
+	}
+
+	virtual double bsdf(const Ray& r_in, const hit_record& rec, const Ray& r_out) const {
+		return 0;
+	}
 
 	virtual Colour emitted(double u, double v, const Point3& p) const {
 		return Colour(0, 0, 0);

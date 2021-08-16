@@ -30,6 +30,28 @@ class XZRect : public Hittable {
 			output_box = AABB(Point3(x0, k - 0.0001, z0), Point3(x1, k + 0.0001, z1));
 			return true;
 		}
+
+		// Given a random direction, what is the PDF of sampling this object
+		virtual double pdf_value(const Point3& o, const Vec3& direction) const override {
+			// Trace a ray to this hittable from the given location and direction
+			hit_record rec;
+			if (!this->hit(Ray(o, direction), 0.001, infinity, rec)) {
+				return 0;
+			}
+
+			double area = (x1 - x0) * (z1 - z0);
+			double distanceSquared = rec.t * rec.t * direction.length_squared();
+			double cosine = fabs(dot(direction, rec.normal) / direction.length());
+
+			return distanceSquared / (cosine * area);
+		}
+
+		// Generate a random direction to sample this PDF from
+		virtual Vec3 random(const Vec3& o) const override {
+			Point3 randomPoint = Point3(random_double(x0, x1), k, random_double(z0, z1));
+			//std::cerr << "ORIGIN: " << o << std::endl;
+			return unit_vector(randomPoint - o);
+		}
 };
 
 class YZRect : public Hittable {

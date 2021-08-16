@@ -7,7 +7,7 @@ public:
 	Colour albedo;
 	DiffuseLight(const Colour& a) : albedo(a) {}
 
-	virtual bool scatter(const Ray& r_in, const hit_record& rec, Colour& attenuation, Ray& scattered) const override {
+	virtual bool scatter(const Ray& r_in, const hit_record& rec, scatter_record& srec) const override {
 		return false;
 	}
 
