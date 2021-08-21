@@ -58,7 +58,7 @@ bool YZRect::hit(const Ray& r, double t_min, double t_max, hit_record& rec) cons
 	double y = r.origin().y() + t * r.direction().y();
 
 	// If intersection occurs outside of rec then return false
-	if (y < y0 || y > y1 || z < z0 || y > z1)
+	if (y < y0 || y > y1 || z < z0 || z > z1)
 		return false;
 
 	// Set the hit record accordingly

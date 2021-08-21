@@ -20,6 +20,13 @@
 #include <chrono>
 #include <thread>
 
+// Debugging a single thread will be easier than debugging multiple
+#if DEBUG_MODE == 0
+#define THREAD_COUNT 10
+#else
+#define THREAD_COUNT 1
+#endif
+
 // Recursive function for calculating intersections and colour
 Colour ray_colour(const Ray& r, std::shared_ptr<Texture> background, const Hittable& world, std::shared_ptr<Hittable> lights, int depth) {	
 	// Base case for recursion (add no more colour)
@@ -104,15 +111,21 @@ HittableList cornellBox() {
 	std::shared_ptr<Dialectric> glass = std::make_shared<Dialectric>(1.5);
 	std::shared_ptr<Lambertian> image_mat = std::make_shared<Lambertian>(image_texture);
 
+	//std::shared_ptr<Hittable> mesh = std::make_shared<Mesh>("models/greek.obj", 20, true, red);
+	std::shared_ptr<Hittable> sp = std::make_shared<Sphere>(Vec3(0, 0, 0), 1, image_mat);
+
+
 	// Objects
 	HittableList objects;
-	objects.add(std::make_shared<YZRect>(0, 555, 0, 555, 555, green));
-	objects.add(std::make_shared<YZRect>(0, 555, 0, 555, 0, red));
-	objects.add(std::make_shared<XZRect>(0, 555, 0, 555, 0, white));
-	objects.add(std::make_shared<XZRect>(0, 555, 0, 555, 555, white));
-	objects.add(std::make_shared<XYRect>(0, 555, 0, 555, 555, white));
-	objects.add(std::make_shared<XZRect>(163, 393, 177, 382, 554, light));
-	objects.add(std::make_shared<Sphere>(Vec3(278, 278, 278), 150, image_mat));
+	objects.add(std::make_shared<YZRect>(0, 555, 0, 555, 555, green));		// left wall
+	objects.add(std::make_shared<YZRect>(0, 555, 0, 555, 0, red));			// right wall
+	objects.add(std::make_shared<XZRect>(0, 555, 0, 555, 0, white));		// bottom wall
+	objects.add(std::make_shared<XZRect>(0, 555, 0, 555, 555, white));		// top wall
+	objects.add(std::make_shared<XYRect>(0, 555, 0, 555, 555, white));		// back wall
+	objects.add(std::make_shared<XZRect>(163, 393, 177, 382, 554, light));	// light
+	//objects.add(std::make_shared<Sphere>(Vec3(278, 278, 278), 150, image_mat));
+	//objects.add(mesh);
+	objects.add(std::make_shared<Transform>(sp, Vec3(278, 278, 278), Vec3(0, 0, 0), Vec3(150.0, 150.0, 150.0)));
 	//objects.add(std::make_shared<Sphere>(Vec3(278, 278, 278), 170, glass));
 
 	return objects;
@@ -265,7 +278,7 @@ void printProgressOfThreads(int* progresses, int count) {
 			else
 				std::cerr << "..." << progresses[i];
 		}
-		std::cerr << std::flush;
+		std::cerr << "            " << std::flush;
 
 		// Break if we need
 		if (cancel)
@@ -350,7 +363,6 @@ int main() {
 	// Point this to an object if you want to test AABB
 	std::shared_ptr<Hittable> test_object = 0;
 
-	const int THREAD_COUNT = 10;
 	std::thread threads[THREAD_COUNT];
 	std::vector<Colour> scanlineParts[THREAD_COUNT];
 	int threadProgresses[THREAD_COUNT];
