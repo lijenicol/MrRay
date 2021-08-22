@@ -106,7 +106,12 @@ bool Transform::hit(const Ray& r, double t_min, double t_max, hit_record& rec) c
 
 	// Set the true hit point in the rec
 	rec.p = p;
+
+	// Set correct normal
 	rec.set_face_normal(r, normal);
+	
+	// Make sure that rec t is correct 
+	rec.t = (rec.p - r.origin()).length();
 
 	return true;
 }

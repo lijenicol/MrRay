@@ -49,6 +49,13 @@ Colour ray_colour(const Ray& r, std::shared_ptr<Texture> background, const Hitta
 	if (!rec.mat->scatter(r, rec, srec))
 		return emitted;
 
+	// If the generated ray is specular, then we do not need to sample directions
+	// (this is because the specular only has one possible scattering ray)
+	if (srec.isSpecular) {
+		return srec.attenuation * ray_colour(srec.specularRay, background, world, lights, depth - 1)
+			* dot(rec.normal, srec.specularRay.direction());
+	}
+
 	// Determine russian roulette termination
 	//float maxChannel = fmax(fmax(srec.attenuation[0], srec.attenuation[1]), srec.attenuation[2]);
 	//float pContinue = 1 - maxChannel;
@@ -58,14 +65,6 @@ Colour ray_colour(const Ray& r, std::shared_ptr<Texture> background, const Hitta
 	float randomRussian = random_double();
 	if (randomRussian < pContinue) {
 		return Colour(0, 0, 0);
-	}
-
-	// If the generated ray is specular, then we do not need to sample directions
-	// (this is because the specular only has one possible scattering ray)
-	if (srec.isSpecular) {
-		/*return srec.attenuation * ray_colour(srec.specularRay, background, world, lights, depth - 1) 
-			* dot(rec.normal, srec.specularRay.direction()) * invpContinue;*/
-		return srec.attenuation * ray_colour(srec.specularRay, background, world, lights, depth - 1);
 	}
 
 	// Generate sample direction
@@ -79,10 +78,6 @@ Colour ray_colour(const Ray& r, std::shared_ptr<Texture> background, const Hitta
 	}
 
 	// Recursively scatter rays
-	/*return emitted + srec.attenuation * rec.mat->bsdf(r, rec, scattered) 
-		* dot(rec.normal, scattered.direction())
-		* ray_colour(scattered, background, world, lights, depth - 1) * invpContinue / pdf;*/
-	// std::cerr << srec.attenuation << std::endl;
 	return emitted + srec.attenuation * rec.mat->bsdf(r, rec, scattered)
 		* dot(rec.normal, scattered.direction())
 		* ray_colour(scattered, background, world, lights, depth - 1) * invpContinue / pdf;
@@ -107,12 +102,13 @@ HittableList cornellBox() {
 	std::shared_ptr<Lambertian> red = std::make_shared<Lambertian>(Colour(.65, .05, .05));
 	std::shared_ptr<Lambertian> white = std::make_shared<Lambertian>(Colour(.73, .73, .73));
 	std::shared_ptr<Lambertian> green = std::make_shared<Lambertian>(Colour(.12, .45, .15));
-	std::shared_ptr<DiffuseLight> light = std::make_shared<DiffuseLight>(Colour(15.0, 15.0, 15.0));
+	std::shared_ptr<DiffuseLight> light = std::make_shared<DiffuseLight>(Colour(12.0, 12.0, 12.0));
 	std::shared_ptr<Dialectric> glass = std::make_shared<Dialectric>(1.5);
 	std::shared_ptr<Lambertian> image_mat = std::make_shared<Lambertian>(image_texture);
+	std::shared_ptr<Metal> metal = std::make_shared<Metal>(Colour(0.9, 0.6, 0.1), 0.92);
 
-	//std::shared_ptr<Hittable> mesh = std::make_shared<Mesh>("models/greek.obj", 20, true, red);
-	std::shared_ptr<Hittable> sp = std::make_shared<Sphere>(Vec3(0, 0, 0), 1, image_mat);
+	//std::shared_ptr<Hittable> mesh = std::make_shared<Mesh>("models/greek.obj", 0.5, true, white);
+	//std::shared_ptr<Hittable> sp = std::make_shared<Sphere>(Vec3(0, 0, 0), 1, image_mat);
 
 
 	// Objects
@@ -122,10 +118,10 @@ HittableList cornellBox() {
 	objects.add(std::make_shared<XZRect>(0, 555, 0, 555, 0, white));		// bottom wall
 	objects.add(std::make_shared<XZRect>(0, 555, 0, 555, 555, white));		// top wall
 	objects.add(std::make_shared<XYRect>(0, 555, 0, 555, 555, white));		// back wall
-	objects.add(std::make_shared<XZRect>(163, 393, 177, 382, 554, light));	// light
-	//objects.add(std::make_shared<Sphere>(Vec3(278, 278, 278), 150, image_mat));
+	objects.add(std::make_shared<XZRect>(103, 453, 117, 442, 554, light));	// light
+	objects.add(std::make_shared<Sphere>(Vec3(278, 278, 278), 150, metal));	// metal ball
 	//objects.add(mesh);
-	objects.add(std::make_shared<Transform>(sp, Vec3(278, 278, 278), Vec3(0, 0, 0), Vec3(150.0, 150.0, 150.0)));
+	//objects.add(std::make_shared<Transform>(mesh, Vec3(265, 185, 278), Vec3(0, 180, 0), Vec3(200.0, 200.0, 200.0)));
 	//objects.add(std::make_shared<Sphere>(Vec3(278, 278, 278), 170, glass));
 
 	return objects;
@@ -293,7 +289,7 @@ int main() {
 	
 	// Image properties
 	const double aspect_ratio = 1.0;
-	const int image_width = 400;
+	const int image_width = 800;
 	const int image_height = (int)(image_width / aspect_ratio);
 	const int samples_per_pixel = 20;
 	const int max_depth = 5;
@@ -391,15 +387,16 @@ int main() {
 		threads[i].join();
 	}
 
+	// Wait til progress thread is done (it should be at this point)
+	progressThread.join();
+
 	// Combine all the scanlines into one image
+	std::cerr << "\nWriting image to file\n";
 	for (int j = THREAD_COUNT-1; j >= 0; j--) {
 		for (int i = 0; i < scanlineHeight * image_width; i++) {
 			write_colour(std::cout, scanlineParts[j][i]);
 		}
 	}
-
-	// Wait til progress thread is done (it should be at this point)
-	progressThread.join();
 
 	// End Clock
 	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
