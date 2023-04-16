@@ -22,7 +22,7 @@
 
 // Debugging a single thread will be easier than debugging multiple
 #if DEBUG_MODE == 0
-#define THREAD_COUNT 10
+#define THREAD_COUNT 1
 #else
 #define THREAD_COUNT 1
 #endif
