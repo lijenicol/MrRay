@@ -1,7 +1,7 @@
 #pragma once
 
-#include "rtutils.h"
-#include "AABB.h"
+#include "../rtutils.h"
+#include "../AABB.h"
 
 class Material;
 

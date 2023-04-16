@@ -2,37 +2,17 @@ target_sources(ray
     PRIVATE 
         AABB.cpp
         AABB.h
-        AARect.cpp
-        AARect.h
-        BVHNode.cpp
-        BVHNode.h
         Camera.h
         Colour.cpp
         Colour.h
-        Dialectric.h
-        DiffuseLight.h
-        Disk.cpp
-        Disk.h
-        Hittable.h
-        HittableList.cpp
-        HittableList.h
-        Lambertian.h
         Main.cpp
-        Material.h
-        Mesh.cpp
-        Mesh.h
-        Metal.h
         ONB.h
         PDF.h
         Ray.h
         rt_stb_image.h
         rtutils.h
-        Sphere.cpp
-        Sphere.h
-        Texture.h
-        Transform.cpp
-        Transform.h
-        Triangle.cpp
-        Triangle.h
         Vec3.h
 )
+
+add_subdirectory(geom)
+add_subdirectory(material)

@@ -1,24 +1,27 @@
-#include "rtutils.h"
-
-#include "Camera.h"
-#include "Colour.h"
-#include "Sphere.h"
-#include "AARect.h"
-#include "AABB.h"
-#include "BVHNode.h"
-#include "Disk.h"
-#include "HittableList.h"
-#include "Lambertian.h"
-#include "Metal.h"
-#include "Dialectric.h"
-#include "DiffuseLight.h"
-#include "Triangle.h"
-#include "Mesh.h"
-#include "Transform.h"
-#include "PDF.h"
 #include <iostream>
 #include <chrono>
 #include <thread>
+
+#include "rtutils.h"
+
+#include "AABB.h"
+#include "Camera.h"
+#include "Colour.h"
+#include "PDF.h"
+
+#include "geom/AARect.h"
+#include "geom/BVHNode.h"
+#include "geom/Disk.h"
+#include "geom/HittableList.h"
+#include "geom/Mesh.h"
+#include "geom/Sphere.h"
+#include "geom/Transform.h"
+#include "geom/Triangle.h"
+
+#include "material/Dialectric.h"
+#include "material/DiffuseLight.h"
+#include "material/Lambertian.h"
+#include "material/Metal.h"
 
 // Debugging a single thread will be easier than debugging multiple
 #if DEBUG_MODE == 0

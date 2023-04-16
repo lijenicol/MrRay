@@ -2,6 +2,8 @@
 #include "rtutils.h"
 #include "ONB.h"
 
+#include "geom/Hittable.h"
+
 
 class PDF {
 public:

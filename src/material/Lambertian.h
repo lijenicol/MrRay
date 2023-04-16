@@ -1,8 +1,8 @@
 #pragma once
-#include "rtutils.h"
+#include "../rtutils.h"
 #include "Material.h"
 #include "Texture.h"
-#include "ONB.h"
+#include "../ONB.h"
 
 class Lambertian : public Material {
 public:

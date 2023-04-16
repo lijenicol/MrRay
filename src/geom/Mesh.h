@@ -4,7 +4,7 @@
  **/
 
 #pragma once
-#include "rtutils.h"
+#include "../rtutils.h"
 #include "Hittable.h"
 #include "BVHNode.h"
 #include "Triangle.h"

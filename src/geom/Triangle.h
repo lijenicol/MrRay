@@ -1,5 +1,5 @@
 #pragma once
-#include "rtutils.h"
+#include "../rtutils.h"
 #include "Hittable.h"
 
 // Could be a class but it only stores data

@@ -1,6 +1,6 @@
 #pragma once
-#include "rtutils.h"
-#include "PDF.h"
+#include "../rtutils.h"
+#include "../PDF.h"
 
 struct hit_record;
 

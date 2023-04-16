@@ -1,6 +1,6 @@
 #pragma once
-#include "rtutils.h"
-#include "rt_stb_image.h"
+#include "../rtutils.h"
+#include "../rt_stb_image.h"
 
 class Texture {
 	public:

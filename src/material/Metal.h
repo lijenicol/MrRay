@@ -1,5 +1,5 @@
 #pragma once
-#include "rtutils.h"
+#include "../rtutils.h"
 #include "Material.h"
 
 class Metal : public Material {

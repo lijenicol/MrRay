@@ -1,5 +1,5 @@
 #pragma once
-#include "rtutils.h"
+#include "../rtutils.h"
 #include "Hittable.h"
 
 class Transform : public Hittable {
