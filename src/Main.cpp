@@ -2,6 +2,8 @@
 #include <chrono>
 #include <thread>
 
+#include "argparse/argparse.hpp"
+
 #include "rtutils.h"
 
 #include "AABB.h"
@@ -285,18 +287,22 @@ void printProgressOfThreads(int* progresses, int count) {
 	}
 }
 
-int main() {
+struct RenderSettings {
+	int imageWidth;
+	int imageHeight;
+	int samplesPerPixel;
+	int maxDepth;
+	
+	RenderSettings(int w, int h, int spp, int d) 
+		: imageWidth(w), imageHeight(h), samplesPerPixel(spp), maxDepth(d) {}
 
+	double aspectRatio() const { return imageWidth / (double)imageHeight; }
+};
+
+void execute(const RenderSettings& renderSettings) {
 	// Start clock
 	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 	
-	// Image properties
-	const double aspect_ratio = 1.0;
-	const int image_width = 800;
-	const int image_height = (int)(image_width / aspect_ratio);
-	const int samples_per_pixel = 20;
-	const int max_depth = 5;
-
 	// Camera
 	Point3 lookFrom;
 	Point3 lookAt;
@@ -348,16 +354,16 @@ int main() {
 
 	Vec3 vup(0, 1, 0);
 	double focus_dist = (lookFrom - lookAt).length();
-	Camera cam(lookFrom, lookAt, vup, fov, aspect_ratio, aperture, focus_dist);
+	Camera cam(lookFrom, lookAt, vup, fov, renderSettings.aspectRatio(), aperture, focus_dist);
 
 	// Render
 
 	// Set up the ppm file headers
-	std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
+	std::cout << "P3\n" << renderSettings.imageWidth << ' ' << renderSettings.imageHeight << "\n255\n";
 	
 	// Place some metadata in the ppm
-	std::cout << "# Samples Per Pixel: " << samples_per_pixel << "\n";
-	std::cout << "# Ray Depth: " << max_depth << "\n";
+	std::cout << "# Samples Per Pixel: " << renderSettings.samplesPerPixel << "\n";
+	std::cout << "# Ray Depth: " << renderSettings.maxDepth << "\n";
 
 	// Point this to an object if you want to test AABB
 	std::shared_ptr<Hittable> test_object = 0;
@@ -365,21 +371,21 @@ int main() {
 	std::thread threads[THREAD_COUNT];
 	std::vector<Colour> scanlineParts[THREAD_COUNT];
 	int threadProgresses[THREAD_COUNT];
-	int scanlineHeight = image_height / THREAD_COUNT;
+	int scanlineHeight = renderSettings.imageHeight / THREAD_COUNT;
 	
 	// Spawn threads
 	for (int i = 0; i < THREAD_COUNT; i++) {
 		// The last thread may have less scanlines due to some division errors
 		// so we need to account for that here
-		if (i == THREAD_COUNT - 1 && scanlineHeight * (i + 1) != image_height) {
-			threads[i] = std::thread(threadTest, scanlineHeight * i, image_height - scanlineHeight * i, image_width, image_height,
-				samples_per_pixel, std::ref(cam), sb_tex, std::ref(world), lights, max_depth, std::ref(scanlineParts[i]), std::ref(threadProgresses[i]));
+		if (i == THREAD_COUNT - 1 && scanlineHeight * (i + 1) != renderSettings.imageWidth) {
+			threads[i] = std::thread(threadTest, scanlineHeight * i, renderSettings.imageHeight - scanlineHeight * i, renderSettings.imageWidth, renderSettings.imageHeight,
+				renderSettings.samplesPerPixel, std::ref(cam), sb_tex, std::ref(world), lights, renderSettings.maxDepth, std::ref(scanlineParts[i]), std::ref(threadProgresses[i]));
 			continue;
 		}
 
 		// Spawn thread normally
-		threads[i] = std::thread(threadTest, scanlineHeight * i, scanlineHeight, image_width, image_height,
-			samples_per_pixel, std::ref(cam), sb_tex, std::ref(world), lights, max_depth, std::ref(scanlineParts[i]), std::ref(threadProgresses[i]));
+		threads[i] = std::thread(threadTest, scanlineHeight * i, scanlineHeight, renderSettings.imageWidth, renderSettings.imageHeight,
+			renderSettings.samplesPerPixel, std::ref(cam), sb_tex, std::ref(world), lights, renderSettings.maxDepth, std::ref(scanlineParts[i]), std::ref(threadProgresses[i]));
 	}
 
 	// Spawn progress thread (for logging progress)
@@ -396,7 +402,7 @@ int main() {
 	// Combine all the scanlines into one image
 	std::cerr << "\nWriting image to file\n";
 	for (int j = THREAD_COUNT-1; j >= 0; j--) {
-		for (int i = 0; i < scanlineHeight * image_width; i++) {
+		for (int i = 0; i < scanlineHeight * renderSettings.imageWidth; i++) {
 			write_colour(std::cout, scanlineParts[j][i]);
 		}
 	}
@@ -407,4 +413,43 @@ int main() {
 	std::cerr << "\nTotal time elapsed = " << std::chrono::duration_cast<std::chrono::seconds>(end - begin).count() << "s\n" << std::endl;
 	std::cerr << "\nDone.\n";
 	std::cerr << "\n";
+}
+
+int main(int argc, char** argv) {
+	argparse::ArgumentParser program("ray");
+
+	program.add_argument("--width")
+		.scan<'d', int>()
+		.help("Image width")
+		.required();
+	program.add_argument("--height")
+		.scan<'d', int>()
+		.help("Image height")
+		.required();
+	program.add_argument("--spp")
+		.scan<'d', int>()
+		.help("Number of samples per pixel")
+		.default_value(20);
+	program.add_argument("--depth")
+		.scan<'d', int>()
+		.help("Maximum depth of rays")
+		.default_value(5);
+
+	try {
+		program.parse_args(argc, argv);
+	}
+	catch (const std::runtime_error& err) {
+		std::cerr << err.what() << std::endl;
+		std::cerr << program << std::endl;
+		return 1;
+	}
+
+	const int width = program.get<int>("--width");
+	const int height = program.get<int>("--height");
+	const int spp = program.get<int>("--spp");
+	const int depth = program.get<int>("--depth"); 
+	
+	RenderSettings renderSettings(width, height, spp, depth);
+	execute(renderSettings);
+	return 0;
 }
