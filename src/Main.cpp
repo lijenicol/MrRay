@@ -33,13 +33,7 @@
 #endif
 
 // Recursive function for calculating intersections and colour
-Colour ray_colour(const Ray& r, std::shared_ptr<Texture> background, const Hittable& world, std::shared_ptr<Hittable> lights, int depth) {	
-	// Base case for recursion (add no more colour)
-	// NOTE: THIS IS COMMENTED OUT DUE TO RUSSIAN ROULETTE TERMINATION
-	/*if (depth <= 0) {
-		return Colour(0, 0, 0);
-	}*/
-
+Colour ray_colour(const Ray& r, std::shared_ptr<Texture> background, const Hittable& world, std::shared_ptr<Hittable> lights) {	
 	// If the ray hits nothing, return the skybox colour
 	hit_record rec;
 	if (!world.hit(r, 0.001, infinity, rec)) {
@@ -57,7 +51,7 @@ Colour ray_colour(const Ray& r, std::shared_ptr<Texture> background, const Hitta
 	// If the generated ray is specular, then we do not need to sample directions
 	// (this is because the specular only has one possible scattering ray)
 	if (srec.isSpecular) {
-		return srec.attenuation * ray_colour(srec.specularRay, background, world, lights, depth - 1)
+		return srec.attenuation * ray_colour(srec.specularRay, background, world, lights)
 			* dot(rec.normal, srec.specularRay.direction());
 	}
 
@@ -85,7 +79,7 @@ Colour ray_colour(const Ray& r, std::shared_ptr<Texture> background, const Hitta
 	// Recursively scatter rays
 	return emitted + srec.attenuation * rec.mat->bsdf(r, rec, scattered)
 		* dot(rec.normal, scattered.direction())
-		* ray_colour(scattered, background, world, lights, depth - 1) * invpContinue / pdf;
+		* ray_colour(scattered, background, world, lights) * invpContinue / pdf;
 }
 
 // Renders an objects AABB for debug purposes
@@ -236,7 +230,7 @@ HittableList testSky() {
 }
 
 void threadTest(int offset, int height, int image_width, int image_height, int samples_per_pixel, const Camera& cam,
-		std::shared_ptr<Texture> sb_tex, const Hittable& world, std::shared_ptr<Hittable> lights, int max_depth, std::vector<Colour>& output, int& progress) {
+		std::shared_ptr<Texture> sb_tex, const Hittable& world, std::shared_ptr<Hittable> lights, std::vector<Colour>& output, int& progress) {
 	for (int j = offset + height - 1; j >= offset; j--) {
 		//std::cerr << "\rScanlines remaining: " << j << ' ' << std::flush;
 		progress = j - offset;
@@ -246,7 +240,7 @@ void threadTest(int offset, int height, int image_width, int image_height, int s
 				double u = (i + random_double()) / (image_width - 1.0);
 				double v = (j + random_double()) / (image_height - 1.0);
 				Ray r = cam.get_ray(u, v);
-				pixel_colour += ray_colour(r, sb_tex, world, lights, max_depth);
+				pixel_colour += ray_colour(r, sb_tex, world, lights);
 			}
 			//write_colour(std::cout, pixel_colour / samples_per_pixel);
 			output.push_back(pixel_colour / samples_per_pixel);
@@ -291,10 +285,9 @@ struct RenderSettings {
 	int imageWidth;
 	int imageHeight;
 	int samplesPerPixel;
-	int maxDepth;
 	
-	RenderSettings(int w, int h, int spp, int d) 
-		: imageWidth(w), imageHeight(h), samplesPerPixel(spp), maxDepth(d) {}
+	RenderSettings(int w, int h, int spp) 
+		: imageWidth(w), imageHeight(h), samplesPerPixel(spp) {}
 
 	double aspectRatio() const { return imageWidth / (double)imageHeight; }
 };
@@ -363,7 +356,6 @@ void execute(const RenderSettings& renderSettings) {
 	
 	// Place some metadata in the ppm
 	std::cout << "# Samples Per Pixel: " << renderSettings.samplesPerPixel << "\n";
-	std::cout << "# Ray Depth: " << renderSettings.maxDepth << "\n";
 
 	// Point this to an object if you want to test AABB
 	std::shared_ptr<Hittable> test_object = 0;
@@ -379,13 +371,13 @@ void execute(const RenderSettings& renderSettings) {
 		// so we need to account for that here
 		if (i == THREAD_COUNT - 1 && scanlineHeight * (i + 1) != renderSettings.imageWidth) {
 			threads[i] = std::thread(threadTest, scanlineHeight * i, renderSettings.imageHeight - scanlineHeight * i, renderSettings.imageWidth, renderSettings.imageHeight,
-				renderSettings.samplesPerPixel, std::ref(cam), sb_tex, std::ref(world), lights, renderSettings.maxDepth, std::ref(scanlineParts[i]), std::ref(threadProgresses[i]));
+				renderSettings.samplesPerPixel, std::ref(cam), sb_tex, std::ref(world), lights, std::ref(scanlineParts[i]), std::ref(threadProgresses[i]));
 			continue;
 		}
 
 		// Spawn thread normally
 		threads[i] = std::thread(threadTest, scanlineHeight * i, scanlineHeight, renderSettings.imageWidth, renderSettings.imageHeight,
-			renderSettings.samplesPerPixel, std::ref(cam), sb_tex, std::ref(world), lights, renderSettings.maxDepth, std::ref(scanlineParts[i]), std::ref(threadProgresses[i]));
+			renderSettings.samplesPerPixel, std::ref(cam), sb_tex, std::ref(world), lights, std::ref(scanlineParts[i]), std::ref(threadProgresses[i]));
 	}
 
 	// Spawn progress thread (for logging progress)
@@ -430,10 +422,6 @@ int main(int argc, char** argv) {
 		.scan<'d', int>()
 		.help("Number of samples per pixel")
 		.default_value(20);
-	program.add_argument("--depth")
-		.scan<'d', int>()
-		.help("Maximum depth of rays")
-		.default_value(5);
 
 	try {
 		program.parse_args(argc, argv);
@@ -447,9 +435,8 @@ int main(int argc, char** argv) {
 	const int width = program.get<int>("--width");
 	const int height = program.get<int>("--height");
 	const int spp = program.get<int>("--spp");
-	const int depth = program.get<int>("--depth"); 
 	
-	RenderSettings renderSettings(width, height, spp, depth);
+	RenderSettings renderSettings(width, height, spp);
 	execute(renderSettings);
 	return 0;
 }
