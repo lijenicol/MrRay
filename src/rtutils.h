@@ -4,8 +4,6 @@
 #include <math.h>
 #include <cstdlib>
 
-#define DEBUG_MODE 0
-
 // Constants
 
 const double infinity = std::numeric_limits<double>::infinity();
