@@ -1,9 +1,5 @@
 target_sources(ray 
     PRIVATE 
-        Dialectric.h
-        DiffuseLight.h
-        Lambertian.h
         Material.h
-        Metal.h
         Texture.h      
 )

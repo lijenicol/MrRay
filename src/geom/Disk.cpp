@@ -26,6 +26,6 @@ bool Disk::hit(const Ray& r, double t_min, double t_max, hit_record& rec) const 
 
 	// Set normal and material
 	rec.set_face_normal(r, Vec3(0, 1, 0));
-	rec.mat = mat;
+	rec.mat = mat.get();
 	return true;
 }

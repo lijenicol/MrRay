@@ -51,7 +51,7 @@ bool Triangle::hit(const Ray& r, double t_min, double t_max, hit_record& rec) co
 	rec.t = t;
 	rec.p = intersectionPoint;
 	get_triangle_uv(w, rec.u, rec.v);
-	rec.mat = mat;
+	rec.mat = mat.get();
 
 	// If smooth shading then use interpolated normals
 	if (smooth_shading) {

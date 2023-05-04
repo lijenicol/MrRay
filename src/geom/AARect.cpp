@@ -19,7 +19,7 @@ bool XYRect::hit(const Ray& r, double t_min, double t_max, hit_record& rec) cons
 	rec.t = t;
 	Vec3 outward_normal(0, 0, 1);
 	rec.set_face_normal(r, outward_normal);
-	rec.mat = mat;
+	rec.mat = mat.get();
 	rec.p = r.at(t);
 	return true;
 }
@@ -43,7 +43,7 @@ bool XZRect::hit(const Ray& r, double t_min, double t_max, hit_record& rec) cons
 	rec.t = t;
 	Vec3 outward_normal(0, 1, 0);
 	rec.set_face_normal(r, outward_normal);
-	rec.mat = mat;
+	rec.mat = mat.get();
 	rec.p = r.at(t);
 	return true;
 }
@@ -67,7 +67,7 @@ bool YZRect::hit(const Ray& r, double t_min, double t_max, hit_record& rec) cons
 	rec.t = t;
 	Vec3 outward_normal(1, 0, 0);
 	rec.set_face_normal(r, outward_normal);
-	rec.mat = mat;
+	rec.mat = mat.get();
 	rec.p = r.at(t);
 	return true;
 }

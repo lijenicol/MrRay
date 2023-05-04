@@ -9,7 +9,7 @@ class Material;
 struct hit_record {
 	Point3 p;
 	Vec3 normal;
-	std::shared_ptr<Material> mat;
+	Material* mat;
 	double t;
 	double u;
 	double v;
