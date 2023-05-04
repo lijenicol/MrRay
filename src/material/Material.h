@@ -1,6 +1,9 @@
-#pragma once
+#ifndef MATERIAL_MATERIAL_H
+#define MATERIAL_MATERIAL_H
+
 #include "../rtutils.h"
 #include "../PDF.h"
+#include "../memory.h"
 #include "Texture.h"
 
 struct hit_record;
@@ -141,3 +144,5 @@ public:
 		return 1 / pi;
 	}
 };
+
+#endif

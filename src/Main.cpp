@@ -6,20 +6,13 @@
 
 #include "rtutils.h"
 
-#include "AABB.h"
 #include "Camera.h"
 #include "Colour.h"
 #include "PDF.h"
 #include "memory.h"
+#include "scene.h"
 
-#include "geom/AARect.h"
-#include "geom/BVHNode.h"
-#include "geom/Disk.h"
-#include "geom/HittableList.h"
-#include "geom/Mesh.h"
 #include "geom/Sphere.h"
-#include "geom/Transform.h"
-#include "geom/Triangle.h"
 
 #include "material/Material.h"
 #include "material/Texture.h"
@@ -28,7 +21,7 @@ size_t MemoryArena::blockCount = 0;
 
 // Recursive function for calculating intersections and colour
 Colour ray_colour(const Ray& r, const Texture& background, 
-			      const Hittable& world, const Hittable& lights,
+			      const Hittable& world, Hittable* lights,
 				  MemoryArena& arena) {	
 	// If the ray hits nothing, return the skybox colour
 	hit_record rec;
@@ -80,29 +73,6 @@ Colour ray_colour(const Ray& r, const Texture& background,
 		* ray_colour(scattered, background, world, lights, arena) * invpContinue / pdf;
 }
 
-// Cornell Box scene
-HittableList cornellBox() {
-	// Materials
-	std::shared_ptr<Lambertian> red = std::make_shared<Lambertian>(Colour(.65, .05, .05));
-	std::shared_ptr<Lambertian> white = std::make_shared<Lambertian>(Colour(.73, .73, .73));
-	std::shared_ptr<Lambertian> green = std::make_shared<Lambertian>(Colour(.12, .45, .15));
-	std::shared_ptr<DiffuseLight> light = std::make_shared<DiffuseLight>(Colour(12.0, 12.0, 12.0));
-	std::shared_ptr<Dialectric> glass = std::make_shared<Dialectric>(1.5);
-	std::shared_ptr<Metal> metal = std::make_shared<Metal>(Colour(0.9, 0.6, 0.1), 0.92);
-
-	// Objects
-	HittableList objects;
-	objects.add(std::make_shared<YZRect>(0, 555, 0, 555, 555, green));		// left wall
-	objects.add(std::make_shared<YZRect>(0, 555, 0, 555, 0, red));			// right wall
-	objects.add(std::make_shared<XZRect>(0, 555, 0, 555, 0, white));		// bottom wall
-	objects.add(std::make_shared<XZRect>(0, 555, 0, 555, 555, white));		// top wall
-	objects.add(std::make_shared<XYRect>(0, 555, 0, 555, 555, white));		// back wall
-	objects.add(std::make_shared<XZRect>(103, 453, 117, 442, 554, light));	// light
-	objects.add(std::make_shared<Sphere>(Vec3(278, 278, 278), 150, metal));	// metal ball
-
-	return objects;
-}
-
 struct RenderSettings {
 	unsigned int imageWidth;
 	unsigned int imageHeight;
@@ -143,7 +113,7 @@ struct ScanlineBlock {
 		delete[] colours;
 	}
 
-	void execute(const Camera& cam, const Texture& sb_tex, const Hittable& world, const Hittable& lights) {
+	void execute(const Camera& cam, const Texture& sb_tex, const Hittable& world, Hittable* lights) {
 		for (unsigned int j = this->offset; j < this->offset + this->height; j++) {
 			for (unsigned int i = 0; i < renderSettings.imageWidth; i++) {
 				Colour pixel_colour(0, 0, 0);
@@ -160,38 +130,20 @@ struct ScanlineBlock {
 	}
 };
 
-void executeBlock(std::shared_ptr<ScanlineBlock> block) {
-	// FIXME: All of this scene creation can go in another class
-	// Create camera
-	Point3 lookFrom(278, 288, -800);
-	Point3 lookAt(278, 278, 0);
-	double fov = 40;
-	double aperture = 0.05;
-	Vec3 vup(0, 1, 0);
-	double focus_dist = (lookFrom - lookAt).length();
-	double aspectRatio = block->renderSettings.aspectRatio();
-	Camera cam(lookFrom, lookAt, vup, fov, aspectRatio, aperture, focus_dist);
-
-	// Create skybox
-	SolidColour sb_tex(0.1, 0.1, 0.1);
-
-	// Create world
-	std::shared_ptr<Lambertian> red = std::make_shared<Lambertian>(Colour(.8, .05, .05));
-	Sphere world(Vec3(278, 278, 278), 150, red);
-
-	// Create lights
-	std::shared_ptr<DiffuseLight> lightmat = std::make_shared<DiffuseLight>(Colour(1, 1, 1));
-	XZRect lights(163, 393, 177, 382, 554, lightmat);
-
+void executeBlock(std::shared_ptr<ScanlineBlock> block, Scene scene) 
+{
 	// Execute
 	std::cerr << "\nBlock " << block->blockID << " started";
 	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-	block->execute(cam, sb_tex, world, lights);
+	block->execute(
+		scene.mainCam, *(scene.skyboxTexture.get()), *(scene.world.get()), 
+		nullptr);
 	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 	std::cerr << "\nBlock " << block->blockID << " finished: " << std::chrono::duration_cast<std::chrono::seconds>(end - begin).count() << "s\n" << std::endl;
 }
 
-void execute(const RenderSettings& renderSettings) {
+void execute(const RenderSettings& renderSettings, const Scene& scene) 
+{
 	// Start clock
 	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 	
@@ -217,7 +169,7 @@ void execute(const RenderSettings& renderSettings) {
 
 	std::vector<std::thread> threads(renderSettings.threads);
 	for (size_t i = 0; i < renderSettings.threads; ++i) {
-		threads[i] = std::thread(executeBlock, blocks[i]);
+		threads[i] = std::thread(executeBlock, blocks[i], scene);
 	}
 
 	for (std::thread& thread : threads) {
@@ -237,6 +189,19 @@ void execute(const RenderSettings& renderSettings) {
 	std::cerr << "\nTotal time elapsed = " << std::chrono::duration_cast<std::chrono::seconds>(end - begin).count() << "s\n" << std::endl;
 	std::cerr << "\nDone.\n";
 	std::cerr << "\n";
+}
+
+Camera defaultCamera(const RenderSettings& renderSettings)
+{
+	Point3 lookFrom(278, 288, -800);
+	Point3 lookAt(278, 278, 0);
+	double fov = 40;
+	double aperture = 0.05;
+	Vec3 vup(0, 1, 0);
+	double focus_dist = (lookFrom - lookAt).length();
+	double aspectRatio = renderSettings.aspectRatio();
+	return Camera(lookFrom, lookAt, vup, fov, aspectRatio, 
+				  aperture, focus_dist);
 }
 
 int main(int argc, char** argv) {
@@ -274,6 +239,6 @@ int main(int argc, char** argv) {
 	const unsigned int threads = program.get<unsigned int>("--threads");
 	
 	RenderSettings renderSettings(width, height, spp, threads);
-	execute(renderSettings);
+	execute(renderSettings, cornellBox(defaultCamera(renderSettings)));
 	return 0;
 }

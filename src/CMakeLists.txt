@@ -6,8 +6,11 @@ target_sources(ray
         Colour.cpp
         Colour.h
         Main.cpp
+        memory.h
         ONB.h
         PDF.h
+        scene.h
+        scene.cpp
         Ray.h
         rt_stb_image.h
         rtutils.h

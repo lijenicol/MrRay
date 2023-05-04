@@ -5,6 +5,7 @@
 
 class Material;
 
+// FIXME: Find another place for this outside this header
 // A hit record contains information about a ray intersection with an object
 struct hit_record {
 	Point3 p;
