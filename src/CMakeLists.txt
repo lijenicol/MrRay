@@ -11,6 +11,8 @@ target_sources(ray
         PDF.h
         scene.h
         scene.cpp
+        timer.h
+        timer.cpp
         Ray.h
         rt_stb_image.h
         rtutils.h

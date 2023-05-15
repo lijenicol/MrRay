@@ -11,6 +11,7 @@
 #include "PDF.h"
 #include "memory.h"
 #include "scene.h"
+#include "timer.h"
 
 #include "geom/Sphere.h"
 
@@ -133,20 +134,15 @@ struct ScanlineBlock {
 void executeBlock(std::shared_ptr<ScanlineBlock> block, Scene scene) 
 {
 	// Execute
-	std::cerr << "\nBlock " << block->blockID << " started";
-	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 	block->execute(
 		scene.mainCam, *(scene.skyboxTexture.get()), *(scene.world.get()), 
 		nullptr);
-	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-	std::cerr << "\nBlock " << block->blockID << " finished: " << std::chrono::duration_cast<std::chrono::seconds>(end - begin).count() << "s\n" << std::endl;
 }
 
 void execute(const RenderSettings& renderSettings, const Scene& scene) 
 {
-	// Start clock
-	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-	
+	Timer programTimer("execute");
+
 	// Set up the ppm file headers
 	std::cout << "P3\n" << renderSettings.imageWidth << ' ' << renderSettings.imageHeight << "\n255\n";
 	
@@ -184,9 +180,6 @@ void execute(const RenderSettings& renderSettings, const Scene& scene)
 	
 	// End Clock
 	std::cerr << "Block count: " << MemoryArena::blockCount << std::endl;
-	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-	//std::cout << "# Time Taken: " << std::chrono::duration_cast<std::chrono::seconds>(end - begin).count() << "s\n";
-	std::cerr << "\nTotal time elapsed = " << std::chrono::duration_cast<std::chrono::seconds>(end - begin).count() << "s\n" << std::endl;
 	std::cerr << "\nDone.\n";
 	std::cerr << "\n";
 }
