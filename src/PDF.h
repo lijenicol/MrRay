@@ -1,5 +1,6 @@
 #pragma once
 #include "rtutils.h"
+#include "sampler.h"
 #include "ONB.h"
 
 #include "geom/Hittable.h"
@@ -9,14 +10,14 @@ class PDF {
 public:
 	virtual ~PDF() {}
 	virtual double value(const Vec3& direction) const = 0;
-	virtual Vec3 generate() const = 0;
+	virtual Vec3 generate(Sampler& sampler) const = 0;
 };
 
 
 // Generates a random point given the cos(theta)/pi PDF
-inline Vec3 randomCosineDirection() {
-	double r1 = random_double();
-	double r2 = random_double();
+inline Vec3 randomCosineDirection(Sampler& sampler) {
+	double r1 = sampler.getDouble();
+	double r2 = sampler.getDouble();
 	double z = sqrt(1 - r2);
 
 	double phi = 2 * pi * r1;
@@ -37,8 +38,8 @@ public:
 		return (cosine <= 0) ? 0 : cosine/pi;
 	}
 
-	virtual Vec3 generate() const override {
-		return unit_vector(uvw.local(randomCosineDirection()));
+	virtual Vec3 generate(Sampler& sampler) const override {
+		return unit_vector(uvw.local(randomCosineDirection(sampler)));
 	}
 };
 
@@ -54,7 +55,7 @@ public:
 		return ptr->pdf_value(o, direction);
 	}
 
-	virtual Vec3 generate() const override {
+	virtual Vec3 generate(Sampler& sampler) const override {
 		return ptr->random(o);
 	}
 };
@@ -73,9 +74,9 @@ public:
 		return 0.5 * p[0]->value(direction) + 0.5 * p[1]->value(direction);
 	}
 
-	virtual Vec3 generate() const override {
-		if (random_double() < 0.5)
-			return p[0]->generate();
-		return p[1]->generate();
+	virtual Vec3 generate(Sampler& sampler) const override {
+		if (sampler.getDouble() < 0.5)
+			return p[0]->generate(sampler);
+		return p[1]->generate(sampler);
 	}
 };

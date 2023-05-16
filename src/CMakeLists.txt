@@ -9,6 +9,7 @@ target_sources(ray
         memory.h
         ONB.h
         PDF.h
+        sampler.h
         scene.h
         scene.cpp
         timer.h

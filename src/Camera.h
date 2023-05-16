@@ -1,5 +1,6 @@
 #pragma once
 #include "rtutils.h"
+#include "sampler.h"
 
 class Camera {
 	public: 
@@ -21,8 +22,8 @@ class Camera {
 			lens_radius = aperture / 2;
 		}
 
-		Ray get_ray(double s, double t) const {
-			Vec3 rd = lens_radius * random_in_unit_disk();
+		Ray get_ray(double s, double t, Sampler& sampler) const {
+			Vec3 rd = lens_radius * sampler.inUnitDisk();
 			Vec3 offset = u * rd.x() + v * rd.y();
 			return Ray(origin + offset, unit_vector(lower_left_corner + s * horizontal + t * vertical - origin - offset));
 		}

@@ -37,7 +37,7 @@ Scene cornellBox(const Camera& mainCam)
 	objects->add(std::make_shared<XZRect>(0, 555, 0, 555, 555, white));		
 	objects->add(std::make_shared<XYRect>(0, 555, 0, 555, 555, white));		
 	objects->add(std::make_shared<XZRect>(103, 453, 117, 442, 554, light));	
-	objects->add(std::make_shared<Sphere>(Vec3(278, 278, 278), 150, metal));	
+	objects->add(std::make_shared<Sphere>(Vec3(278, 278, 278), 150, white));	
 
 	return Scene(mainCam, objects, skyboxTexture);
 }

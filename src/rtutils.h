@@ -3,6 +3,7 @@
 #include <memory>
 #include <math.h>
 #include <cstdlib>
+#include <iostream>
 
 // Constants
 
@@ -16,6 +17,9 @@ inline double degrees_to_radians(double degrees) {
 }
 
 inline double random_double() {
+	// FIXME: Leaving this print statement in until all uses
+	//  of this method have been knocked out
+	std::cerr << "Deprecated: random_double()" << std::endl;
 	return rand() / (RAND_MAX + 1.0);
 }
 
