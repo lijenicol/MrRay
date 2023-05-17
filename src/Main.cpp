@@ -1,5 +1,6 @@
 #include <iostream>
 #include <chrono>
+#include <mutex>
 #include <thread>
 
 #include "argparse/argparse.hpp"
@@ -93,6 +94,51 @@ struct RenderSettings {
 	double aspectRatio() const { return imageWidth / (double)imageHeight; }
 };
 
+struct Film
+{
+public:
+	const unsigned int width, height;
+
+	Film(unsigned int width, unsigned int height) 
+		: width(width), height(height)
+	{
+		colours = new Colour[width * height];
+	} 
+
+	~Film()
+	{
+		delete[] colours;
+	}
+
+	// Copy a tile of colours to this film
+	void writeTile(Colour* newColours, unsigned int width, unsigned int height,
+			       unsigned int offset)
+	{
+		std::unique_lock<std::mutex> lock(filmMutex);
+		for (size_t j = 0; j < height; ++j)
+		{
+			for (size_t i = 0; i < width; ++i)
+			{
+				size_t filmIndex = (j + offset) * width + i;
+				size_t tileIndex = j * width + i;
+				colours[filmIndex] = newColours[tileIndex];
+			}
+		}
+	}
+
+	void writeToFile()
+	{
+		std::unique_lock<std::mutex> lock(filmMutex);
+		for (size_t i = 0; i < width * height; ++i)
+			// TODO: Support multiple image formats
+			write_colour(std::cout, colours[i]);
+	}
+
+private:
+	std::mutex filmMutex;
+	Colour* colours;
+};
+
 struct ScanlineBlock {
 	const unsigned int blockID; 
 	const unsigned int offset;
@@ -133,12 +179,14 @@ struct ScanlineBlock {
 	}
 };
 
-void executeBlock(std::shared_ptr<ScanlineBlock> block, Scene scene) 
+void executeBlock(std::shared_ptr<ScanlineBlock> block, Scene scene, 
+			      std::shared_ptr<Film> film) 
 {
-	// Execute
 	block->execute(
 		scene.mainCam, *(scene.skyboxTexture.get()), *(scene.world.get()), 
 		nullptr);
+	film->writeTile(block->colours, block->renderSettings.imageWidth,
+					block->height, block->offset);
 }
 
 void execute(const RenderSettings& renderSettings, const Scene& scene) 
@@ -165,21 +213,20 @@ void execute(const RenderSettings& renderSettings, const Scene& scene)
 	blocks[i] = std::make_shared<ScanlineBlock>(
 		i, i * scanlineHeight, remainingLines, renderSettings);
 
+	std::shared_ptr<Film> film = std::make_shared<Film>(
+		renderSettings.imageWidth, renderSettings.imageHeight);
+
 	std::vector<std::thread> threads(renderSettings.threads);
 	for (size_t i = 0; i < renderSettings.threads; ++i) {
-		threads[i] = std::thread(executeBlock, blocks[i], scene);
+		threads[i] = std::thread(executeBlock, blocks[i], scene, film);
 	}
 
 	for (std::thread& thread : threads) {
 		thread.join();
 	}
 
-	for (const std::shared_ptr<ScanlineBlock>& block : blocks) {
-		for (size_t i = 0; i < block->coloursCount; i++) {
-			write_colour(std::cout, block->colours[i]);
-		}
-	}
-	
+	film->writeToFile();
+
 	// End Clock
 	std::cerr << "Block count: " << MemoryArena::blockCount << std::endl;
 	std::cerr << "\nDone.\n";
