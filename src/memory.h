@@ -10,7 +10,7 @@
 class alignas(64) MemoryArena
 {
 public:
-    MemoryArena() { current = NewBlock(); }
+    MemoryArena() { Reset(); }
 
     ~MemoryArena() 
     {
@@ -21,33 +21,37 @@ public:
     void* Alloc(size_t size)
     {
         if (allocated + size >= ALLOC_SIZE)
-            current = NewBlock();
+            current = GetBlock();
         void* ret = current;
         current += size;
         allocated += size;
         return ret;
     }
 
-    static size_t blockCount;
+    void Reset()
+    {
+        currentBlock = 0;
+        current = GetBlock();
+    }
 
 private:
     MemoryArena(const MemoryArena&) = delete;
 
-    void* NewBlock()
+    void* GetBlock()
     {
-        // FIXME: Probs don't need
-        blockCount++;
         allocated = 0;
-        // Does this need to be aligned properly?? 
-        char* block = new char[ALLOC_SIZE];
-        blocks.push_back(block);
-        return block;
+        if (currentBlock + 1 > blocks.size())
+        {
+            char* block = new char[ALLOC_SIZE];
+            blocks.push_back(block);
+        }
+        return blocks[currentBlock++];
     }
 
     const size_t ALLOC_SIZE = 262144;
     size_t allocated;
-    std::list<char*> blocks;
-    void* currentBlock;
+    std::vector<char*> blocks;
+    int currentBlock;
     void* current;
 };
 

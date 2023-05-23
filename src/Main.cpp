@@ -20,8 +20,6 @@
 #include "material/Material.h"
 #include "material/Texture.h"
 
-size_t MemoryArena::blockCount = 0;
-
 // Recursive function for calculating intersections and colour
 Colour ray_colour(const Ray& r, const Scene& scene, MemoryArena& arena, 
 			      Sampler& sampler) {	
@@ -82,17 +80,37 @@ struct RenderSettings {
 	unsigned int imageHeight;
 	unsigned int samplesPerPixel;
 	unsigned int threads;
+	unsigned int tileSize;
 	
 	RenderSettings(unsigned int w, unsigned int h, unsigned int spp, 
-				   unsigned int threads) 
+				   unsigned int threads, unsigned int tileSize) 
 		: imageWidth(w), imageHeight(h), samplesPerPixel(spp), 
-		  threads(threads) {}
+		  threads(threads), tileSize(tileSize) {}
 
 	RenderSettings(const RenderSettings& other) 
 		: imageWidth(other.imageWidth), imageHeight(other.imageHeight), 
-		  samplesPerPixel(other.samplesPerPixel), threads(other.threads) {}
+		  samplesPerPixel(other.samplesPerPixel), threads(other.threads),
+		  tileSize(other.tileSize){}
 
 	double aspectRatio() const { return imageWidth / (double)imageHeight; }
+};
+
+struct Tile
+{
+	const unsigned int top, left, width, height;
+	Colour* colours;
+
+	Tile(unsigned int top, unsigned int left, unsigned int width, 
+		 unsigned int height) 
+		: top(top), left(left), width(width), height(height) 
+	{
+		colours = new Colour[width * height];
+	}
+
+	~Tile()
+	{
+		delete[] colours;
+	}
 };
 
 struct Film
@@ -112,17 +130,16 @@ public:
 	}
 
 	// Copy a tile of colours to this film
-	void writeTile(Colour* newColours, unsigned int width, unsigned int height,
-			       unsigned int offset)
+	void writeTile(const Tile& tile)
 	{
 		std::unique_lock<std::mutex> lock(filmMutex);
-		for (size_t j = 0; j < height; ++j)
+		for (size_t j = 0; j < tile.height; ++j)
 		{
-			for (size_t i = 0; i < width; ++i)
+			for (size_t i = 0; i < tile.width; ++i)
 			{
-				size_t filmIndex = (j + offset) * width + i;
-				size_t tileIndex = j * width + i;
-				colours[filmIndex] = newColours[tileIndex];
+				size_t filmIndex = (j + tile.top) * this->width + i + tile.left;
+				size_t tileIndex = j * tile.width + i;
+				colours[filmIndex] = tile.colours[tileIndex];
 			}
 		}
 	}
@@ -142,30 +159,23 @@ private:
 
 struct ScanlineBlock {
 	const unsigned int blockID; 
-	const unsigned int offset;
-	const unsigned int height;
 	const RenderSettings renderSettings;
 	Sampler sampler;
-	Colour* colours;
-	size_t coloursCount;
 	MemoryArena arena;
 
-	ScanlineBlock(unsigned int blockID, unsigned int offset, 
-				  unsigned int height, const RenderSettings& renderSettings) 
-			: blockID(blockID), offset(offset), height(height), 
-		      renderSettings(renderSettings), arena(), sampler(blockID) {
-		const unsigned int totalPixels = renderSettings.imageWidth * height;
-		colours = new Colour[totalPixels];
-		coloursCount = totalPixels;
-	};
+	ScanlineBlock(unsigned int blockID, const RenderSettings& renderSettings)
+		: blockID(blockID), renderSettings(renderSettings), arena(), 
+		  sampler(blockID)
+	{};
 
-	~ScanlineBlock() {
-		delete[] colours;
-	}
-
-	void execute(const Scene& scene) {
-		for (unsigned int j = this->offset; j < this->offset + this->height; j++) {
-			for (unsigned int i = 0; i < renderSettings.imageWidth; i++) {
+	void execute(const Scene& scene, const Tile& tile) 
+	{
+		for (unsigned int j = tile.top; 
+			 j < tile.top + tile.height; j++) 
+		{
+			for (unsigned int i = tile.left; 
+				 i < tile.left + tile.width; i++) 
+			{
 				Colour pixel_colour(0, 0, 0);
 				for (unsigned int s = 0; s < renderSettings.samplesPerPixel; s++) {
 					double u = (i + sampler.getDouble()) / (renderSettings.imageWidth - 1.0);
@@ -173,19 +183,49 @@ struct ScanlineBlock {
 					Ray r = scene.mainCam.get_ray(u, v, sampler);
 					pixel_colour += ray_colour(r, scene, arena, sampler);
 				}
-				unsigned int pIndex = (j - this->offset) * renderSettings.imageWidth + i;
-				colours[pIndex] = pixel_colour / renderSettings.samplesPerPixel;
+				unsigned int tileIndex = (j - tile.top) * tile.width + i - tile.left;
+				tile.colours[tileIndex] = pixel_colour / renderSettings.samplesPerPixel;
 			}
 		}
 	}
 };
 
-void executeBlock(std::shared_ptr<ScanlineBlock> block, Scene scene, 
-			      std::shared_ptr<Film> film) 
+class TilesQueue
 {
-	block->execute(scene);
-	film->writeTile(block->colours, block->renderSettings.imageWidth,
-					block->height, block->offset);
+public:
+	TilesQueue() {}
+
+	void addTile(std::shared_ptr<Tile> tile)
+	{
+		std::unique_lock<std::mutex> lock(queueMutex);
+		tiles.push_back(tile);
+	}
+
+	Tile* getTile() 
+	{
+		std::unique_lock<std::mutex> lock(queueMutex);
+		if (currentIndex < tiles.size())
+			return tiles[currentIndex++].get();
+		return nullptr;
+	}
+private:
+	std::vector<std::shared_ptr<Tile>> tiles;
+	int currentIndex;
+	std::mutex queueMutex;
+};
+
+void executeBlock(std::shared_ptr<ScanlineBlock> block, Scene scene, 
+			      std::shared_ptr<Film> film, 
+				  std::shared_ptr<TilesQueue> tilesQueue) 
+{
+	Tile* tile = tilesQueue->getTile();
+	while(tile != nullptr)
+	{
+		block->execute(scene, *tile);
+		film->writeTile(*tile);
+		tile = tilesQueue->getTile();
+		block->arena.Reset();
+	}
 }
 
 void execute(const RenderSettings& renderSettings, const Scene& scene) 
@@ -198,26 +238,36 @@ void execute(const RenderSettings& renderSettings, const Scene& scene)
 	// Place some metadata in the ppm
 	std::cout << "# Samples Per Pixel: " << renderSettings.samplesPerPixel << "\n";
 
-	unsigned int scanlineHeight = renderSettings.imageHeight / renderSettings.threads;
-	unsigned int remainingLines = renderSettings.imageHeight;
-
-	// Create scanline blocks
-	std::vector<std::shared_ptr<ScanlineBlock>> blocks(renderSettings.threads);
-	for (size_t i = 0; i < renderSettings.threads - 1; ++i) {
-		blocks[i] = std::make_shared<ScanlineBlock>(
-			i, i * scanlineHeight, scanlineHeight, renderSettings);
-		remainingLines -= scanlineHeight;
-	}
-	size_t i =  renderSettings.threads - 1;
-	blocks[i] = std::make_shared<ScanlineBlock>(
-		i, i * scanlineHeight, remainingLines, renderSettings);
-
 	std::shared_ptr<Film> film = std::make_shared<Film>(
 		renderSettings.imageWidth, renderSettings.imageHeight);
 
+	unsigned int tileSize = renderSettings.tileSize;
+	std::shared_ptr<TilesQueue> tilesQueue = std::make_shared<TilesQueue>();
+
+	unsigned int remainingHeight = film->height;
+	while (remainingHeight > 0)
+	{
+		unsigned int height = remainingHeight > tileSize ? tileSize : remainingHeight;
+		unsigned int remainingWidth = film->width;
+		while (remainingWidth > 0)
+		{
+			unsigned int width = remainingWidth > tileSize ? tileSize : remainingWidth;
+			tilesQueue->addTile(
+				std::make_shared<Tile>(
+					film->height - remainingHeight, 
+					film->width - remainingWidth, 
+					width, height)
+			);
+			remainingWidth -= width;
+		}
+		remainingHeight -= height;
+	}
+
 	std::vector<std::thread> threads(renderSettings.threads);
 	for (size_t i = 0; i < renderSettings.threads; ++i) {
-		threads[i] = std::thread(executeBlock, blocks[i], scene, film);
+		std::shared_ptr<ScanlineBlock> block 
+			= std::make_shared<ScanlineBlock>(i, renderSettings);
+		threads[i] = std::thread(executeBlock, block, scene, film, tilesQueue);
 	}
 
 	for (std::thread& thread : threads) {
@@ -259,6 +309,10 @@ int main(int argc, char** argv) {
 		.scan<'u', unsigned int>()
 		.help("Number of parallel threads to run. Default is the maximum available")
 		.default_value(std::thread::hardware_concurrency());
+	program.add_argument("--tilesize")
+		.scan<'u', unsigned int>()
+		.help("Tile size")
+		.default_value(64u);
 
 	try {
 		program.parse_args(argc, argv);
@@ -273,8 +327,9 @@ int main(int argc, char** argv) {
 	const unsigned int height = program.get<unsigned int>("--height");
 	const unsigned int spp = program.get<unsigned int>("--spp");
 	const unsigned int threads = program.get<unsigned int>("--threads");
+	const unsigned int tileSize = program.get<unsigned int>("--tilesize");
 	
-	RenderSettings renderSettings(width, height, spp, threads);
+	RenderSettings renderSettings(width, height, spp, threads, tileSize);
 	execute(renderSettings, cornellBox(defaultCamera(renderSettings)));
 	return 0;
 }
