@@ -23,16 +23,15 @@
 size_t MemoryArena::blockCount = 0;
 
 // Recursive function for calculating intersections and colour
-Colour ray_colour(const Ray& r, const Texture& background, 
-			      const Hittable& world, Hittable* lights,
-				  MemoryArena& arena, Sampler& sampler) {	
+Colour ray_colour(const Ray& r, const Scene& scene, MemoryArena& arena, 
+			      Sampler& sampler) {	
 	// If the ray hits nothing, return the skybox colour
 	hit_record rec;
-	if (!world.hit(r, 0.001, infinity, rec)) {
+	if (!scene.world->hit(r, 0.001, infinity, rec)) {
 		// Compute u,v of hit
 		double u, v;
 		Sphere::get_sphere_uv(unit_vector(r.direction()), u, v);
-		return background.value(u,v,rec);
+		return scene.skyboxTexture->value(u,v,rec);
 	}
 
 	Colour emitted = rec.mat->emitted(0,0,Vec3(0,0,0));	// needs to change when u,v coordinates is implemented
@@ -43,7 +42,8 @@ Colour ray_colour(const Ray& r, const Texture& background,
 	// If the generated ray is specular, then we do not need to sample directions
 	// (this is because the specular only has one possible scattering ray)
 	if (srec.isSpecular) {
-		return srec.attenuation * ray_colour(srec.specularRay, background, world, lights, arena, sampler)
+		return srec.attenuation 
+			* ray_colour(srec.specularRay, scene, arena, sampler)
 			* dot(rec.normal, srec.specularRay.direction());
 	}
 
@@ -73,7 +73,8 @@ Colour ray_colour(const Ray& r, const Texture& background,
 	// Recursively scatter rays
 	return emitted + srec.attenuation * rec.mat->bsdf(r, rec, scattered)
 		* dot(rec.normal, scattered.direction())
-		* ray_colour(scattered, background, world, lights, arena, sampler) * invpContinue / pdf;
+		* ray_colour(scattered, scene, arena, sampler) 
+		* invpContinue / pdf;
 }
 
 struct RenderSettings {
@@ -162,15 +163,15 @@ struct ScanlineBlock {
 		delete[] colours;
 	}
 
-	void execute(const Camera& cam, const Texture& sb_tex, const Hittable& world, Hittable* lights) {
+	void execute(const Scene& scene) {
 		for (unsigned int j = this->offset; j < this->offset + this->height; j++) {
 			for (unsigned int i = 0; i < renderSettings.imageWidth; i++) {
 				Colour pixel_colour(0, 0, 0);
 				for (unsigned int s = 0; s < renderSettings.samplesPerPixel; s++) {
 					double u = (i + sampler.getDouble()) / (renderSettings.imageWidth - 1.0);
 					double v = (j + sampler.getDouble()) / (renderSettings.imageHeight - 1.0);
-					Ray r = cam.get_ray(u, v, sampler);
-					pixel_colour += ray_colour(r, sb_tex, world, lights, arena, sampler);
+					Ray r = scene.mainCam.get_ray(u, v, sampler);
+					pixel_colour += ray_colour(r, scene, arena, sampler);
 				}
 				unsigned int pIndex = (j - this->offset) * renderSettings.imageWidth + i;
 				colours[pIndex] = pixel_colour / renderSettings.samplesPerPixel;
@@ -182,9 +183,7 @@ struct ScanlineBlock {
 void executeBlock(std::shared_ptr<ScanlineBlock> block, Scene scene, 
 			      std::shared_ptr<Film> film) 
 {
-	block->execute(
-		scene.mainCam, *(scene.skyboxTexture.get()), *(scene.world.get()), 
-		nullptr);
+	block->execute(scene);
 	film->writeTile(block->colours, block->renderSettings.imageWidth,
 					block->height, block->offset);
 }
@@ -226,11 +225,6 @@ void execute(const RenderSettings& renderSettings, const Scene& scene)
 	}
 
 	film->writeToFile();
-
-	// End Clock
-	std::cerr << "Block count: " << MemoryArena::blockCount << std::endl;
-	std::cerr << "\nDone.\n";
-	std::cerr << "\n";
 }
 
 Camera defaultCamera(const RenderSettings& renderSettings)
