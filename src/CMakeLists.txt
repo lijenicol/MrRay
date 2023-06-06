@@ -5,6 +5,8 @@ target_sources(ray
         Camera.h
         Colour.cpp
         Colour.h
+        film.h
+        film.cpp
         Main.cpp
         memory.h
         ONB.h

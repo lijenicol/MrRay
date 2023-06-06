@@ -8,12 +8,12 @@
 #include "rtutils.h"
 
 #include "Camera.h"
-#include "Colour.h"
 #include "PDF.h"
 #include "memory.h"
 #include "sampler.h"
 #include "scene.h"
 #include "timer.h"
+#include "film.h"
 
 #include "geom/Sphere.h"
 
@@ -81,11 +81,13 @@ struct RenderSettings {
 	unsigned int samplesPerPixel;
 	unsigned int threads;
 	unsigned int tileSize;
+	std::string outputPath;
 	
 	RenderSettings(unsigned int w, unsigned int h, unsigned int spp, 
-				   unsigned int threads, unsigned int tileSize) 
+				   unsigned int threads, unsigned int tileSize, 
+				   const std::string& outputPath) 
 		: imageWidth(w), imageHeight(h), samplesPerPixel(spp), 
-		  threads(threads), tileSize(tileSize) {}
+		  threads(threads), tileSize(tileSize), outputPath(outputPath) {}
 
 	RenderSettings(const RenderSettings& other) 
 		: imageWidth(other.imageWidth), imageHeight(other.imageHeight), 
@@ -93,68 +95,6 @@ struct RenderSettings {
 		  tileSize(other.tileSize){}
 
 	double aspectRatio() const { return imageWidth / (double)imageHeight; }
-};
-
-struct Tile
-{
-	const unsigned int top, left, width, height;
-	Colour* colours;
-
-	Tile(unsigned int top, unsigned int left, unsigned int width, 
-		 unsigned int height) 
-		: top(top), left(left), width(width), height(height) 
-	{
-		colours = new Colour[width * height];
-	}
-
-	~Tile()
-	{
-		delete[] colours;
-	}
-};
-
-struct Film
-{
-public:
-	const unsigned int width, height;
-
-	Film(unsigned int width, unsigned int height) 
-		: width(width), height(height)
-	{
-		colours = new Colour[width * height];
-	} 
-
-	~Film()
-	{
-		delete[] colours;
-	}
-
-	// Copy a tile of colours to this film
-	void writeTile(const Tile& tile)
-	{
-		std::unique_lock<std::mutex> lock(filmMutex);
-		for (size_t j = 0; j < tile.height; ++j)
-		{
-			for (size_t i = 0; i < tile.width; ++i)
-			{
-				size_t filmIndex = (j + tile.top) * this->width + i + tile.left;
-				size_t tileIndex = j * tile.width + i;
-				colours[filmIndex] = tile.colours[tileIndex];
-			}
-		}
-	}
-
-	void writeToFile()
-	{
-		std::unique_lock<std::mutex> lock(filmMutex);
-		for (size_t i = 0; i < width * height; ++i)
-			// TODO: Support multiple image formats
-			write_colour(std::cout, colours[i]);
-	}
-
-private:
-	std::mutex filmMutex;
-	Colour* colours;
 };
 
 struct ScanlineBlock {
@@ -232,12 +172,6 @@ void execute(const RenderSettings& renderSettings, const Scene& scene)
 {
 	Timer programTimer("execute");
 
-	// Set up the ppm file headers
-	std::cout << "P3\n" << renderSettings.imageWidth << ' ' << renderSettings.imageHeight << "\n255\n";
-	
-	// Place some metadata in the ppm
-	std::cout << "# Samples Per Pixel: " << renderSettings.samplesPerPixel << "\n";
-
 	std::shared_ptr<Film> film = std::make_shared<Film>(
 		renderSettings.imageWidth, renderSettings.imageHeight);
 
@@ -274,7 +208,7 @@ void execute(const RenderSettings& renderSettings, const Scene& scene)
 		thread.join();
 	}
 
-	film->writeToFile();
+	film->writeToFile(renderSettings.outputPath);
 }
 
 Camera defaultCamera(const RenderSettings& renderSettings)
@@ -313,6 +247,8 @@ int main(int argc, char** argv) {
 		.scan<'u', unsigned int>()
 		.help("Tile size")
 		.default_value(64u);
+	program.add_argument("out")
+		.help("Output path");
 
 	try {
 		program.parse_args(argc, argv);
@@ -328,8 +264,9 @@ int main(int argc, char** argv) {
 	const unsigned int spp = program.get<unsigned int>("--spp");
 	const unsigned int threads = program.get<unsigned int>("--threads");
 	const unsigned int tileSize = program.get<unsigned int>("--tilesize");
+	const std::string out = program.get<std::string>("out");
 	
-	RenderSettings renderSettings(width, height, spp, threads, tileSize);
+	RenderSettings renderSettings(width, height, spp, threads, tileSize, out);
 	execute(renderSettings, cornellBox(defaultCamera(renderSettings)));
 	return 0;
 }
