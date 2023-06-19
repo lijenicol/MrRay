@@ -3,6 +3,7 @@
 
 #include <mutex>
 #include <string>
+#include <vector>
 
 #include "rtutils.h"
 
@@ -22,6 +23,36 @@ struct Tile
 	{
 		delete[] colours;
 	}
+};
+
+class TilesQueue
+{
+public:
+    TilesQueue() {}
+
+    void addTile(std::shared_ptr<Tile> tile)
+    {
+        std::unique_lock<std::mutex> lock(queueMutex);
+        tiles.push_back(tile);
+    }
+
+    Tile* getTile()
+    {
+        std::unique_lock<std::mutex> lock(queueMutex);
+        if (currentIndex < tiles.size())
+            return tiles[currentIndex++].get();
+        return nullptr;
+    }
+
+    size_t remainingTiles()
+    {
+        std::unique_lock<std::mutex> lock(queueMutex);
+        return tiles.size();
+    }
+private:
+    std::vector<std::shared_ptr<Tile>> tiles;
+    int currentIndex;
+    std::mutex queueMutex;
 };
 
 struct Film

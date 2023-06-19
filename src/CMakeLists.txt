@@ -20,6 +20,8 @@ target_sources(ray
         rt_stb_image.h
         rtutils.h
         Vec3.h
+        renderEngine.cpp
+        renderEngine.h
 )
 
 add_subdirectory(geom)
