@@ -1,4 +1,4 @@
-#include "Triangle.h"
+#include "geom/Triangle.h"
 
 bool Triangle::hit(const Ray& r, double t_min, double t_max, hit_record& rec) const {
 	// Check first bounding box intersection test. This is to speed up calculations (hypothetically)

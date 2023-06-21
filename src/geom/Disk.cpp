@@ -1,4 +1,4 @@
-#include "Disk.h"
+#include "geom/Disk.h"
 
 bool Disk::hit(const Ray& r, double t_min, double t_max, hit_record& rec) const {
 	// Compute ray intersection with plane

@@ -4,10 +4,10 @@
  **/
 
 #pragma once
-#include "../rtutils.h"
-#include "Hittable.h"
-#include "BVHNode.h"
-#include "Triangle.h"
+#include "rtutils.h"
+#include "geom/Hittable.h"
+#include "geom/BVHNode.h"
+#include "geom/Triangle.h"
 
 class Mesh : public Hittable {
 public:

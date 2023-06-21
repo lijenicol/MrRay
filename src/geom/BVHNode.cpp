@@ -1,4 +1,4 @@
-#include "BVHNode.h"
+#include "geom/BVHNode.h"
 #include <algorithm>
 
 void printBVHProgress(int sortedCount, int totalCount) {

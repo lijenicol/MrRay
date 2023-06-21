@@ -1,4 +1,4 @@
-#include "HittableList.h"
+#include "geom/HittableList.h"
 
 bool HittableList::hit(const Ray& r, double t_min, double t_max, hit_record& rec) const {
 	hit_record temp_rec;

@@ -1,28 +1,21 @@
-target_sources(ray 
+target_sources(rayengine
     PRIVATE 
         AABB.cpp
-        AABB.h
-        Camera.h
         Colour.cpp
-        Colour.h
-        film.h
         film.cpp
-        Main.cpp
-        memory.h
-        ONB.h
-        PDF.h
-        sampler.h
-        scene.h
         scene.cpp
-        timer.h
         timer.cpp
-        Ray.h
-        rt_stb_image.h
-        rtutils.h
-        Vec3.h
         renderEngine.cpp
-        renderEngine.h
 )
+
+target_include_directories(rayengine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+
+find_package(OpenImageIO REQUIRED)
+target_include_directories(rayengine PRIVATE ${OpenImageIO_INCLUDE_DIR})
+target_link_libraries(rayengine PRIVATE OpenImageIO::OpenImageIO)
+
+target_sources(ray PRIVATE Main.cpp)
+target_include_directories(ray PRIVATE ${ARGPARSE_INCLUDE_DIR})
 
 add_subdirectory(geom)
 add_subdirectory(material)

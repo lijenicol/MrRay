@@ -1,6 +1,6 @@
 #pragma once
-#include "../rtutils.h"
-#include "Hittable.h"
+#include "rtutils.h"
+#include "geom/Hittable.h"
 
 class Sphere : public Hittable
 {

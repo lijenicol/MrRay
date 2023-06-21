@@ -1,10 +1,10 @@
 #ifndef MATERIAL_MATERIAL_H
 #define MATERIAL_MATERIAL_H
 
-#include "../rtutils.h"
-#include "../PDF.h"
-#include "../memory.h"
-#include "Texture.h"
+#include "memory.h"
+#include "PDF.h"
+#include "rtutils.h"
+#include "material/Texture.h"
 
 struct hit_record;
 

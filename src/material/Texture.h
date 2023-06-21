@@ -1,7 +1,7 @@
 #ifndef MATERIAL_TEXTURE_H
 #define MATERIAL_TEXTURE_H
 
-#include "../rtutils.h"
+#include "rtutils.h"
 
 struct hit_record;
 

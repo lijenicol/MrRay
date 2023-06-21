@@ -1,20 +1,11 @@
-target_sources(ray 
+target_sources(rayengine
     PRIVATE 
         AARect.cpp
-        AARect.h
         BVHNode.cpp
-        BVHNode.h
         Disk.cpp
-        Disk.h
-        Hittable.h
         HittableList.cpp
-        HittableList.h
         Mesh.cpp
-        Mesh.h
         Sphere.cpp
-        Sphere.h
         Transform.cpp
-        Transform.h
         Triangle.cpp
-        Triangle.h
 )

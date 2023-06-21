@@ -1,6 +1,4 @@
-target_sources(ray 
+target_sources(rayengine
     PRIVATE 
-        Material.h
         Texture.cpp
-        Texture.h      
 )

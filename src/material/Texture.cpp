@@ -1,7 +1,6 @@
-#include "Texture.h"
-
-#include "../geom/Hittable.h"
-#include "../rt_stb_image.h"
+#include "rt_stb_image.h"
+#include "geom/Hittable.h"
+#include "material/Texture.h"
 
 Colour NormalTexture::value(double u, double v, const hit_record& rec) const {
     return (rec.normal + Vec3(1, 1, 1)) / 2.0;

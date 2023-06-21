@@ -1,14 +1,17 @@
-cmake_minimum_required(VERSION 3.13.0)
+cmake_minimum_required(VERSION 3.23.0)
 project(Ray)
 
+add_library(rayengine SHARED)
 add_executable(ray "")
-find_package(OpenImageIO REQUIRED)
-target_include_directories(
-    ray 
-        PRIVATE 
-        ${ARGPARSE_INCLUDE_DIR} 
-        ${OpenImageIO_INCLUDE_DIR}
-)
-target_link_libraries(ray PRIVATE OpenImageIO::OpenImageIO)
+target_link_libraries(ray PRIVATE rayengine)
+
+# Setup public headers
+file(GLOB_RECURSE RAY_PUBLIC_HEADER_FILES "src/*.h")
+target_sources(rayengine PUBLIC FILE_SET HEADERS
+    BASE_DIRS src
+    FILES ${RAY_PUBLIC_HEADER_FILES})
+
+install(TARGETS rayengine ray
+        FILE_SET HEADERS)
 
 add_subdirectory(src)

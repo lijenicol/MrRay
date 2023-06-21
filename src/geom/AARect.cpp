@@ -1,4 +1,4 @@
-#include "AARect.h"
+#include "geom/AARect.h"
 
 bool XYRect::hit(const Ray& r, double t_min, double t_max, hit_record& rec) const {
 	// Find the intersection on the z plane

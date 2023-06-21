@@ -1,5 +1,5 @@
-#include "Mesh.h"
-#include "HittableList.h"
+#include "geom/Mesh.h"
+#include "geom/HittableList.h"
 #include <sstream>
 #include <fstream>
 

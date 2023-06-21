@@ -1,7 +1,7 @@
 #pragma once
-#include "../rtutils.h"
-#include "Hittable.h"
-#include "HittableList.h"
+#include "rtutils.h"
+#include "geom/Hittable.h"
+#include "geom/HittableList.h"
 
 class BVHNode : public Hittable {
 public:

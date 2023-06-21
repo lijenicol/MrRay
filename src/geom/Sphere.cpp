@@ -1,4 +1,4 @@
-#include "Sphere.h"
+#include "geom/Sphere.h"
 #include <iostream>
 
 bool Sphere::hit(const Ray& r, double t_min, double t_max, hit_record& rec) const {

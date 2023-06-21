@@ -1,5 +1,5 @@
 #pragma once
-#include "Hittable.h"
+#include "geom/Hittable.h"
 
 #include <vector>
 #include <memory>
