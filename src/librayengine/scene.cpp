@@ -28,6 +28,15 @@ Scene::addHittable(const std::shared_ptr<Hittable>& hittable)
     rawHittables->add(hittable);
 }
 
+void
+Scene::addHittables(const HittableList& hittableList)
+{
+    for (auto const& hittable : hittableList.objects)
+    {
+        this->addHittable(hittable);
+    }
+}
+
 Hittable*
 Scene::getWorld() const
 {

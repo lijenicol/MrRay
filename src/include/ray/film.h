@@ -31,7 +31,7 @@ struct Tile
 class TilesQueue
 {
 public:
-    TilesQueue() {}
+    TilesQueue() : currentIndex(0) {}
 
     void addTile(std::shared_ptr<Tile> tile)
     {

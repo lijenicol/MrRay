@@ -77,7 +77,7 @@ OBJLoader::loadTriangles()
 
     std::string line;
 
-    while (getline(objStream, line)) {
+    while (std::getline(objStream, line)) {
         // Split string
         auto parts = splitString(line, ' ');
 
@@ -144,7 +144,7 @@ OBJLoader::loadTriangles()
     objStream.close();
 
     // Construct triangle instances from indices and scale vertices
-    std::cerr << "Reordering Vertices and Creating Triangles\n";
+    std::cout << "Reordering Vertices and Creating Triangles" << std::endl;
     for (unsigned int i = 0; i < triangleIndices.size(); i++) {
         auto v0 = std::make_shared<vertex_triangle>();
         auto v1 = std::make_shared<vertex_triangle>();

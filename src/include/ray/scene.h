@@ -27,7 +27,7 @@ public:
     /// Add the given hittable to the scene
     void addHittable(const std::shared_ptr<Hittable>& hittable);
     /// Add the given hittables to the scene
-    void addHittables(const std::shared_ptr<HittableList>& hittableList);
+    void addHittables(const HittableList& hittableList);
     /// Returns the world to use for ray intersections
     Hittable* getWorld() const;
 
