@@ -66,13 +66,13 @@ int main(int argc, char** argv) {
 	const std::string out = program.get<std::string>("out");
 	
 	RenderSettings renderSettings(width, height, spp, threads, tileSize, out);
+    Scene cornell = cornellBox(defaultCamera(renderSettings));
 
     RenderEngine engine;
     engine.init(renderSettings);
     {
         Timer timer("execute");
-        engine.execute(
-            renderSettings, cornellBox(defaultCamera(renderSettings)));
+        engine.execute(renderSettings, cornell);
     }
     engine.getFilm()->writeToFile(renderSettings.outputPath);
 	return 0;

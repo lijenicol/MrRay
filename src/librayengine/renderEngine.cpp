@@ -10,6 +10,7 @@
 #include "ray/PDF.h"
 #include "ray/geom/Sphere.h"
 #include "ray/material/Material.h"
+#include "ray/timer.h"
 
 RAY_NAMESPACE_OPEN_SCOPE
 
@@ -20,7 +21,7 @@ ray_colour(const Ray& r, const Scene& scene, MemoryArena& arena,
 {
 	// If the ray hits nothing, return the skybox colour
 	hit_record rec;
-	if (!scene.world->hit(r, 0.001, infinity, rec)) {
+	if (!scene.getWorld()->hit(r, 0.001, infinity, rec)) {
 		// Compute u,v of hit
 		double u, v;
 		Sphere::get_sphere_uv(unit_vector(r.direction()), u, v);
@@ -148,12 +149,17 @@ RenderEngine::init(const RenderSettings& renderSettings)
 }
 
 void
-RenderEngine::execute(const RenderSettings& renderSettings, const Scene& scene)
+RenderEngine::execute(const RenderSettings& renderSettings, Scene& scene)
 {
     if (!_hasInitialized)
     {
         std::cerr << "RenderEngine execution called before init" << std::endl;
         return;
+    }
+
+    {
+        Timer timer("scene init");
+        scene.init();
     }
 
     std::vector<std::thread> threads(renderSettings.threads);

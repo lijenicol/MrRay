@@ -64,7 +64,7 @@ public:
     // Sets up film/tile buffers. Required before running execute()
     void init(const RenderSettings& renderSettings);
     // Runs the execution
-    void execute(const RenderSettings& renderSettings, const Scene& scene);
+    void execute(const RenderSettings& renderSettings, Scene& scene);
 // TODO:
 //    void registerRenderFinishedCallback();
 //    void registerTileFinishedCallback();
