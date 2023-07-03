@@ -13,6 +13,9 @@ struct vertex_triangle {
 	double v;
 };
 
+// FIXME: Rework this class to grab vertex data from a mesh instance.
+//  The updated approach would save memory, and is similar to how PBRT
+//  implements triangles.
 // Holds information about a triangle such as its vertices,
 // Normal and Material, and also provides an intersection method.
 class Triangle : public Hittable

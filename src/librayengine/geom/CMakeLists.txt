@@ -4,7 +4,7 @@ target_sources(rayengine
         BVHNode.cpp
         Disk.cpp
         HittableList.cpp
-#        Mesh.cpp
+        mesh.cpp
         meshLoader.cpp
         Sphere.cpp
         Transform.cpp

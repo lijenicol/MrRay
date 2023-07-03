@@ -66,7 +66,6 @@ Scene cornellBox(const Camera& mainCam)
 	std::shared_ptr<DiffuseLight> light = std::make_shared<DiffuseLight>(Colour(12.0, 12.0, 12.0));
 	std::shared_ptr<Metal> metal = std::make_shared<Metal>(Colour(0.9, 0.6, 0.1), 0.92);
 
-	std::shared_ptr<HittableList> objects = std::make_shared<HittableList>();
     Scene scene(mainCam, skyboxTexture);
 	scene.addHittable(std::make_shared<YZRect>(0, 555, 0, 555, 0, red));
 	scene.addHittable(std::make_shared<YZRect>(0, 555, 0, 555, 555, green));

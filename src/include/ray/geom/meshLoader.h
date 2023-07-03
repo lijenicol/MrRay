@@ -8,6 +8,7 @@
 #include "ray/namespace.h"
 #include "ray/geom/HittableList.h"
 #include "ray/geom/Triangle.h"
+#include "ray/geom/mesh.h"
 
 RAY_NAMESPACE_OPEN_SCOPE
 
@@ -16,16 +17,20 @@ class MeshLoader
 {
 public:
     MeshLoader(const std::string& meshPath);
-    /// Loads the triangles that represent the mesh
+    ~MeshLoader();
+    /// Loads all info that represent the mesh
     ///
     /// \return Whether the load was successful
-    virtual bool loadTriangles() = 0;
-    /// Returns the triangles that were loaded
-    HittableList* getTriangles();
+    virtual bool load() = 0;
+    /// Returns the loaded mesh info
+    RawMeshInfo* getMeshInfo() const;
+    /// Returns whether the mesh has been loaded
+    bool hasLoaded() const { return _hasLoaded; }
+
 protected:
     const std::string _meshPath;
     bool _hasLoaded;
-    std::unique_ptr<HittableList> _triangles;
+    RawMeshInfo* _loadedMeshInfo;
 };
 
 /// Loader for OBJ files
@@ -33,7 +38,7 @@ class OBJLoader final: public MeshLoader
 {
 public:
     OBJLoader(const std::string& meshPath);
-    bool loadTriangles() override;
+    bool load() override;
 };
 
 RAY_NAMESPACE_CLOSE_SCOPE
