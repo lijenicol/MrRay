@@ -28,20 +28,20 @@ class Mesh
 public:
     Mesh(
         const RawMeshInfo& meshInfo, const Vec3& translation,
-        const double& scale, const bool& smooth_shading,
+        const double& scale, const bool& smoothShading,
         std::shared_ptr<Material> mat);
     ~Mesh();
 
     HittableList* getTriangles();
 
 	std::shared_ptr<Material> mat;
-
-private:
-    bool smooth_shading;
     Vec3* positions;
     Vec3* normals;
     // FIXME: UVs should probably be Vec2 so we aren't wasting memory
     Vec3* uvs;
+    bool smoothShading;
+
+private:
     int* positionIndices;
     int* normalIndices;
     int* uvIndices;
