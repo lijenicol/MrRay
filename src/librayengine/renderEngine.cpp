@@ -74,17 +74,14 @@ ray_colour(const Ray& r, const Scene& scene, MemoryArena& arena,
 void
 ExecutionBlock::execute(const Scene& scene, const Tile& tile)
 {
-    for (unsigned int j = tile.top;
-         j < tile.top + tile.height; j++)
-    {
-        for (unsigned int i = tile.left;
-             i < tile.left + tile.width; i++)
-        {
+    Camera* mainCam = scene.getMainCam();
+    for (unsigned int j = tile.top; j < tile.top + tile.height; j++) {
+        for (unsigned int i = tile.left; i < tile.left + tile.width; i++) {
             Colour pixel_colour(0, 0, 0);
             for (unsigned int s = 0; s < renderSettings.samplesPerPixel; s++) {
                 double u = (i + sampler.getDouble()) / (renderSettings.imageWidth - 1.0);
                 double v = (j + sampler.getDouble()) / (renderSettings.imageHeight - 1.0);
-                Ray r = scene.mainCam.get_ray(u, v, sampler);
+                Ray r = mainCam->getRay(u, v, sampler);
                 pixel_colour += ray_colour(r, scene, arena, sampler);
             }
             unsigned int tileIndex = (j - tile.top) * tile.width + i - tile.left;
@@ -154,6 +151,12 @@ RenderEngine::execute(const RenderSettings& renderSettings, Scene& scene)
     if (!_hasInitialized)
     {
         std::cerr << "RenderEngine execution called before init" << std::endl;
+        return;
+    }
+
+    if (!scene.getMainCam())
+    {
+        std::cerr << "No camera to render from!" << std::endl;
         return;
     }
 

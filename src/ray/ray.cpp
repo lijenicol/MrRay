@@ -8,19 +8,44 @@
 #include "ray/renderEngine.h"
 #include "ray/timer.h"
 
+#include "ray/geom/AARect.h"
+
+#include "ray/material/Material.h"
+
 RAY_NAMESPACE_USING_DIRECTIVE
 
-Camera defaultCamera(const RenderSettings& renderSettings)
+/// Returns the cornell box scene, set up with a camera
+Scene cornellBox(const RenderSettings& renderSettings)
 {
-	Point3 lookFrom(278, 288, -800);
-	Point3 lookAt(278, 278, 0);
-	double fov = 40;
-	double aperture = 0.05;
-	Vec3 vup(0, 1, 0);
-	double focus_dist = (lookFrom - lookAt).length();
-	double aspectRatio = renderSettings.aspectRatio();
-	return Camera(lookFrom, lookAt, vup, fov, aspectRatio,
-				  aperture, focus_dist);
+    std::shared_ptr<SolidColour> skyboxTexture = std::make_shared<SolidColour>(0.0, 0.0, 0.0);
+
+    std::shared_ptr<Lambertian> red = std::make_shared<Lambertian>(Colour(.65, .05, .05));
+    std::shared_ptr<Lambertian> white = std::make_shared<Lambertian>(Colour(.73, .73, .73));
+    std::shared_ptr<Lambertian> green = std::make_shared<Lambertian>(Colour(.12, .45, .15));
+    std::shared_ptr<DiffuseLight> light = std::make_shared<DiffuseLight>(Colour(12.0, 12.0, 12.0));
+    std::shared_ptr<Metal> metal = std::make_shared<Metal>(Colour(0.9, 0.6, 0.1), 0.92);
+
+    Scene scene;
+    scene.addHittable(std::make_shared<YZRect>(0, 555, 0, 555, 0, red));
+    scene.addHittable(std::make_shared<YZRect>(0, 555, 0, 555, 555, green));
+    scene.addHittable(std::make_shared<XZRect>(0, 555, 0, 555, 0, white));
+    scene.addHittable(std::make_shared<XZRect>(0, 555, 0, 555, 555, white));
+    scene.addHittable(std::make_shared<XYRect>(0, 555, 0, 555, 555, white));
+    scene.addHittable(std::make_shared<XZRect>(103, 453, 117, 442, 554, light));
+    scene.addHittable(std::make_shared<Sphere>(Vec3(278, 278, 278), 150, white));
+
+    std::shared_ptr<Camera> mainCam = std::make_shared<Camera>(
+            Point3(278, 278, -800),
+            Point3(278, 278, 0),
+            Vec3(0, 1, 0),
+            40,
+            renderSettings.imageWidth / (double)renderSettings.imageHeight,
+            0.05,
+            800
+    );
+    scene.setMainCam(mainCam);
+
+    return scene;
 }
 
 int main(int argc, char** argv) {
@@ -66,7 +91,7 @@ int main(int argc, char** argv) {
 	const std::string out = program.get<std::string>("out");
 	
 	RenderSettings renderSettings(width, height, spp, threads, tileSize, out);
-    Scene cornell = cornellBox(defaultCamera(renderSettings));
+    Scene cornell = cornellBox(renderSettings);
 
     RenderEngine engine;
     engine.init(renderSettings);

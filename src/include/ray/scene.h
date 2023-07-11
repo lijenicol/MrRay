@@ -14,12 +14,8 @@ RAY_NAMESPACE_OPEN_SCOPE
 class Scene
 {
 public:
-    Scene(const Camera& mainCam,
-          const std::shared_ptr<Texture>& skyboxTexture) 
-        : mainCam(mainCam),
-          skyboxTexture(skyboxTexture),
-          rawHittables(std::make_shared<HittableList>()) {}
-    const Camera mainCam;
+    Scene();
+
     const std::shared_ptr<Texture> skyboxTexture;
 
     /// Initializes the scene, making it ready for rendering
@@ -28,18 +24,19 @@ public:
     void addHittable(const std::shared_ptr<Hittable>& hittable);
     /// Add the given hittables to the scene
     void addHittables(const HittableList& hittableList);
+    /// Set the camera to render from
+    void setMainCam(const std::shared_ptr<Camera>& camera)
+        { _mainCamera = camera; };
+    /// Returns the camera to render from
+    Camera *getMainCam() const { return _mainCamera.get(); }
     /// Returns the world to use for ray intersections
     Hittable* getWorld() const;
 
 private:
-    std::shared_ptr<Hittable> world;
-    std::shared_ptr<HittableList> rawHittables;
+    std::shared_ptr<Camera> _mainCamera;
+    std::shared_ptr<Hittable> _world;
+    std::shared_ptr<HittableList> _rawHittables;
 };
-
-/// Simple scene with one sphere
-Scene simpleSphere(const Camera& mainCam);
-/// Cornell box scene
-Scene cornellBox(const Camera& mainCam);
 
 RAY_NAMESPACE_CLOSE_SCOPE
 
