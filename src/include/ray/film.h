@@ -66,12 +66,12 @@ public:
 	Film(unsigned int width, unsigned int height) 
 		: width(width), height(height)
 	{
-		colours = new Colour[width * height];
+		_colours = new Colour[width * height];
 	} 
 
 	~Film()
 	{
-		delete[] colours;
+		delete[] _colours;
 	}
 
 	// Copy a tile of colours to this film
@@ -80,9 +80,11 @@ public:
     // Write film to file
 	void writeToFile(const std::string& path);
 
+    Colour* getData();
+
 private:
 	std::mutex filmMutex;
-	Colour* colours;
+	Colour* _colours;
 };
 
 RAY_NAMESPACE_CLOSE_SCOPE

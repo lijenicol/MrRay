@@ -2,35 +2,35 @@
 
 #include <memory>
 
-#include "ray/rtutils.h"
-#include "ray/Camera.h"
-
 #include "ray/material/Material.h"
 
-#include "ray/geom/Sphere.h"
-#include "ray/geom/AARect.h"
 #include "ray/geom/BVHNode.h"
 
 RAY_NAMESPACE_OPEN_SCOPE
 
 Scene::Scene()
     : _mainCamera(nullptr),
-      skyboxTexture(std::make_shared<SolidColour>(0, 0, 0)),
-      _rawHittables(std::make_shared<HittableList>()) {}
+      _skyboxTexture(std::make_shared<SolidColour>(0, 0, 0)),
+      _rawHittables(std::make_shared<HittableList>()),
+      _hittableListDirty(false)
+{}
 
 void
 Scene::init()
 {
-    // On small scales, a BVH will perform worse; however, on
-    // the larger scale, it is a lot faster
-    _world = std::make_shared<BVHNode>(*_rawHittables, 0, 0);
-//    world = rawHittables;
+    if (_hittableListDirty) {
+        // On small scales, a BVH will perform worse; however, on
+        // the larger scale, it is a lot faster
+        _world = std::make_shared<BVHNode>(*_rawHittables, 0, 0);
+        _hittableListDirty = false;
+    }
 }
 
 void
 Scene::addHittable(const std::shared_ptr<Hittable>& hittable)
 {
     _rawHittables->add(hittable);
+    _hittableListDirty = true;
 }
 
 void

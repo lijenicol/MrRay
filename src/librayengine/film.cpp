@@ -17,7 +17,7 @@ void Film::writeTile(const Tile& tile)
         {
             size_t filmIndex = (j + tile.top) * this->width + i + tile.left;
             size_t tileIndex = j * tile.width + i;
-            colours[filmIndex] = tile.colours[tileIndex];
+            _colours[filmIndex] = tile.colours[tileIndex];
         }
     }
 }
@@ -36,11 +36,17 @@ void Film::writeToFile(const std::string& path)
     OIIO::ImageSpec spec(width, height, 3, OIIO::TypeDesc::FLOAT);
     out->open(path, spec);
     out->write_image(OIIO::TypeDesc::DOUBLE, 
-                     colours,
+                     _colours,
                      sizeof(Colour),
                      OIIO::AutoStride,
                      OIIO::AutoStride);
     out->close();
+}
+
+Colour*
+Film::getData()
+{
+    return _colours;
 }
 
 RAY_NAMESPACE_CLOSE_SCOPE

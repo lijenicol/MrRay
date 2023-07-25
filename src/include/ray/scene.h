@@ -16,8 +16,6 @@ class Scene
 public:
     Scene();
 
-    const std::shared_ptr<Texture> skyboxTexture;
-
     /// Initializes the scene, making it ready for rendering
     void init();
     /// Add the given hittable to the scene
@@ -26,16 +24,23 @@ public:
     void addHittables(const HittableList& hittableList);
     /// Set the camera to render from
     void setMainCam(const std::shared_ptr<Camera>& camera)
-        { _mainCamera = camera; };
+        { _mainCamera = camera; }
     /// Returns the camera to render from
     Camera *getMainCam() const { return _mainCamera.get(); }
     /// Returns the world to use for ray intersections
     Hittable* getWorld() const;
+    /// Set the skybox texture to use
+    void setSkyboxTexture(const std::shared_ptr<Texture>& skyboxTexture)
+        { _skyboxTexture = skyboxTexture; };
+    /// Returns the scene's skybox texture
+    Texture *getSkyboxTexture() const { return _skyboxTexture.get(); }
 
 private:
     std::shared_ptr<Camera> _mainCamera;
     std::shared_ptr<Hittable> _world;
     std::shared_ptr<HittableList> _rawHittables;
+    std::shared_ptr<Texture> _skyboxTexture;
+    bool _hittableListDirty;
 };
 
 RAY_NAMESPACE_CLOSE_SCOPE

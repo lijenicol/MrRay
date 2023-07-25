@@ -25,7 +25,7 @@ ray_colour(const Ray& r, const Scene& scene, MemoryArena& arena,
 		// Compute u,v of hit
 		double u, v;
 		Sphere::get_sphere_uv(unit_vector(r.direction()), u, v);
-		return scene.skyboxTexture->value(u,v,rec);
+		return scene.getSkyboxTexture()->value(u,v,rec);
 	}
 
 	Colour emitted = rec.mat->emitted(0,0,Vec3(0,0,0));	// needs to change when u,v coordinates is implemented

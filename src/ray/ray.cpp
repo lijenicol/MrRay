@@ -17,8 +17,6 @@ RAY_NAMESPACE_USING_DIRECTIVE
 /// Returns the cornell box scene, set up with a camera
 Scene cornellBox(const RenderSettings& renderSettings)
 {
-    std::shared_ptr<SolidColour> skyboxTexture = std::make_shared<SolidColour>(0.0, 0.0, 0.0);
-
     std::shared_ptr<Lambertian> red = std::make_shared<Lambertian>(Colour(.65, .05, .05));
     std::shared_ptr<Lambertian> white = std::make_shared<Lambertian>(Colour(.73, .73, .73));
     std::shared_ptr<Lambertian> green = std::make_shared<Lambertian>(Colour(.12, .45, .15));
