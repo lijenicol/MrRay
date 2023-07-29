@@ -2,6 +2,7 @@
 #define SCENE_H
 
 #include <memory>
+#include <mutex>
 
 #include "ray/namespace.h"
 #include "ray/Camera.h"
@@ -41,6 +42,10 @@ private:
     std::shared_ptr<HittableList> _rawHittables;
     std::shared_ptr<Texture> _skyboxTexture;
     bool _hittableListDirty;
+    std::recursive_mutex _sceneMutex;
+
+    Scene(const Scene&) = delete;
+    Scene& operator=(const Scene&) = delete;
 };
 
 RAY_NAMESPACE_CLOSE_SCOPE

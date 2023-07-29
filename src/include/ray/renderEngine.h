@@ -52,7 +52,7 @@ struct ExecutionBlock
           sampler(blockID)
     {};
 
-    void execute(const Scene& scene, const Tile& tile);
+    void execute(Scene *scene, const Tile& tile);
 };
 
 class RenderEngine
@@ -64,7 +64,8 @@ public:
     // Sets up film/tile buffers. Required before running execute()
     void init(const RenderSettings& renderSettings);
     // Runs the execution
-    void execute(const RenderSettings& renderSettings, Scene& scene);
+    void execute(
+        const RenderSettings& renderSettings, Scene *scene);
 // TODO:
 //    void registerRenderFinishedCallback();
 //    void registerTileFinishedCallback();

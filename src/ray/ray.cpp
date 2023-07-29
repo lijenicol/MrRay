@@ -15,7 +15,7 @@
 RAY_NAMESPACE_USING_DIRECTIVE
 
 /// Returns the cornell box scene, set up with a camera
-Scene cornellBox(const RenderSettings& renderSettings)
+std::shared_ptr<Scene> cornellBox(const RenderSettings& renderSettings)
 {
     std::shared_ptr<Lambertian> red = std::make_shared<Lambertian>(Colour(.65, .05, .05));
     std::shared_ptr<Lambertian> white = std::make_shared<Lambertian>(Colour(.73, .73, .73));
@@ -23,14 +23,14 @@ Scene cornellBox(const RenderSettings& renderSettings)
     std::shared_ptr<DiffuseLight> light = std::make_shared<DiffuseLight>(Colour(12.0, 12.0, 12.0));
     std::shared_ptr<Metal> metal = std::make_shared<Metal>(Colour(0.9, 0.6, 0.1), 0.92);
 
-    Scene scene;
-    scene.addHittable(std::make_shared<YZRect>(0, 555, 0, 555, 0, red));
-    scene.addHittable(std::make_shared<YZRect>(0, 555, 0, 555, 555, green));
-    scene.addHittable(std::make_shared<XZRect>(0, 555, 0, 555, 0, white));
-    scene.addHittable(std::make_shared<XZRect>(0, 555, 0, 555, 555, white));
-    scene.addHittable(std::make_shared<XYRect>(0, 555, 0, 555, 555, white));
-    scene.addHittable(std::make_shared<XZRect>(103, 453, 117, 442, 554, light));
-    scene.addHittable(std::make_shared<Sphere>(Vec3(278, 278, 278), 150, white));
+    std::shared_ptr<Scene> scene = std::make_shared<Scene>();
+    scene->addHittable(std::make_shared<YZRect>(0, 555, 0, 555, 0, red));
+    scene->addHittable(std::make_shared<YZRect>(0, 555, 0, 555, 555, green));
+    scene->addHittable(std::make_shared<XZRect>(0, 555, 0, 555, 0, white));
+    scene->addHittable(std::make_shared<XZRect>(0, 555, 0, 555, 555, white));
+    scene->addHittable(std::make_shared<XYRect>(0, 555, 0, 555, 555, white));
+    scene->addHittable(std::make_shared<XZRect>(103, 453, 117, 442, 554, light));
+    scene->addHittable(std::make_shared<Sphere>(Vec3(278, 278, 278), 150, white));
 
     std::shared_ptr<Camera> mainCam = std::make_shared<Camera>(
             Point3(278, 278, -800),
@@ -41,7 +41,7 @@ Scene cornellBox(const RenderSettings& renderSettings)
             0.05,
             800
     );
-    scene.setMainCam(mainCam);
+    scene->setMainCam(mainCam);
 
     return scene;
 }
@@ -89,13 +89,13 @@ int main(int argc, char** argv) {
 	const std::string out = program.get<std::string>("out");
 	
 	RenderSettings renderSettings(width, height, spp, threads, tileSize, out);
-    Scene cornell = cornellBox(renderSettings);
+    auto cornell = cornellBox(renderSettings);
 
     RenderEngine engine;
     engine.init(renderSettings);
     {
         Timer timer("execute");
-        engine.execute(renderSettings, cornell);
+        engine.execute(renderSettings, cornell.get());
     }
     engine.getFilm()->writeToFile(renderSettings.outputPath);
 	return 0;

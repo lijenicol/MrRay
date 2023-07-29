@@ -12,7 +12,8 @@ Scene::Scene()
     : _mainCamera(nullptr),
       _skyboxTexture(std::make_shared<SolidColour>(0, 0, 0)),
       _rawHittables(std::make_shared<HittableList>()),
-      _hittableListDirty(false)
+      _hittableListDirty(false),
+      _sceneMutex()
 {}
 
 void
@@ -29,6 +30,7 @@ Scene::init()
 void
 Scene::addHittable(const std::shared_ptr<Hittable>& hittable)
 {
+    std::lock_guard<std::recursive_mutex> lock(_sceneMutex);
     _rawHittables->add(hittable);
     _hittableListDirty = true;
 }
@@ -36,6 +38,7 @@ Scene::addHittable(const std::shared_ptr<Hittable>& hittable)
 void
 Scene::addHittables(const HittableList& hittableList)
 {
+    std::lock_guard<std::recursive_mutex> lock(_sceneMutex);
     for (auto const& hittable : hittableList.objects)
     {
         this->addHittable(hittable);

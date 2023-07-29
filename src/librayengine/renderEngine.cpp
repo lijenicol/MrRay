@@ -72,9 +72,9 @@ ray_colour(const Ray& r, const Scene& scene, MemoryArena& arena,
 }
 
 void
-ExecutionBlock::execute(const Scene& scene, const Tile& tile)
+ExecutionBlock::execute(Scene *scene, const Tile& tile)
 {
-    Camera* mainCam = scene.getMainCam();
+    Camera* mainCam = scene->getMainCam();
     for (unsigned int j = tile.top; j < tile.top + tile.height; j++) {
         for (unsigned int i = tile.left; i < tile.left + tile.width; i++) {
             Colour pixel_colour(0, 0, 0);
@@ -82,7 +82,7 @@ ExecutionBlock::execute(const Scene& scene, const Tile& tile)
                 double u = (i + sampler.getDouble()) / (renderSettings.imageWidth - 1.0);
                 double v = (j + sampler.getDouble()) / (renderSettings.imageHeight - 1.0);
                 Ray r = mainCam->getRay(u, v, sampler);
-                pixel_colour += ray_colour(r, scene, arena, sampler);
+                pixel_colour += ray_colour(r, *scene, arena, sampler);
             }
             unsigned int tileIndex = (j - tile.top) * tile.width + i - tile.left;
             tile.colours[tileIndex] = pixel_colour / renderSettings.samplesPerPixel;
@@ -91,7 +91,7 @@ ExecutionBlock::execute(const Scene& scene, const Tile& tile)
 }
 
 void
-executeBlock(std::shared_ptr<ExecutionBlock> block, Scene scene,
+executeBlock(std::shared_ptr<ExecutionBlock> block, Scene *scene,
              std::shared_ptr<Film> film,
              std::shared_ptr<TilesQueue> tilesQueue)
 {
@@ -146,7 +146,8 @@ RenderEngine::init(const RenderSettings& renderSettings)
 }
 
 void
-RenderEngine::execute(const RenderSettings& renderSettings, Scene& scene)
+RenderEngine::execute(
+    const RenderSettings& renderSettings, Scene *scene)
 {
     if (!_hasInitialized)
     {
@@ -154,7 +155,7 @@ RenderEngine::execute(const RenderSettings& renderSettings, Scene& scene)
         return;
     }
 
-    if (!scene.getMainCam())
+    if (!scene->getMainCam())
     {
         std::cerr << "No camera to render from!" << std::endl;
         return;
@@ -162,7 +163,7 @@ RenderEngine::execute(const RenderSettings& renderSettings, Scene& scene)
 
     {
         Timer timer("scene init");
-        scene.init();
+        scene->init();
     }
 
     std::vector<std::thread> threads(renderSettings.threads);
