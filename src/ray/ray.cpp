@@ -7,6 +7,7 @@
 #include "ray/rtutils.h"
 #include "ray/renderEngine.h"
 #include "ray/timer.h"
+#include "ray/matrix.h"
 
 #include "ray/geom/AARect.h"
 

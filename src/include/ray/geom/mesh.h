@@ -7,6 +7,7 @@
 
 #include "ray/namespace.h"
 #include "ray/rtutils.h"
+#include "ray/matrix.h"
 #include "ray/geom/HittableList.h"
 #include "ray/geom/Triangle.h"
 
@@ -27,9 +28,8 @@ class Mesh
 {
 public:
     Mesh(
-        const RawMeshInfo& meshInfo, const Vec3& translation,
-        const double& scale, const bool& smoothShading,
-        std::shared_ptr<Material> mat);
+        const RawMeshInfo& meshInfo, const Mat4& objToWorld,
+        const bool& smoothShading, std::shared_ptr<Material> mat);
     ~Mesh();
 
     HittableList* getTriangles();

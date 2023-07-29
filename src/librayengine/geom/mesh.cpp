@@ -6,7 +6,7 @@
 RAY_NAMESPACE_OPEN_SCOPE
 
 Mesh::Mesh(
-    const RawMeshInfo& meshInfo, const Vec3& translation, const double& scale,
+    const RawMeshInfo& meshInfo, const Mat4& objToWorld,
     const bool& smoothShading, std::shared_ptr<Material> mat)
     : smoothShading(smoothShading), mat(mat),
       _triangles(std::make_unique<HittableList>())
@@ -14,7 +14,13 @@ Mesh::Mesh(
     size_t positionCount = meshInfo.positions.size();
     positions = new Vec3[positionCount];
     for (int i = 0; i < positionCount; i++) {
-        positions[i] = meshInfo.positions[i] * scale + translation;
+        Vec3 position = meshInfo.positions[i];
+        // TODO: Matrix multiplication should be implemented elsewhere
+        positions[i] = Vec3(
+            (objToWorld[0] * position[0]) + (objToWorld[1] * position[1]) + (objToWorld[2] * position[2]) + objToWorld[3],
+            (objToWorld[4] * position[0]) + (objToWorld[5] * position[1]) + (objToWorld[6] * position[2]) + objToWorld[7],
+            (objToWorld[8] * position[0]) + (objToWorld[9] * position[1]) + (objToWorld[10] * position[2]) + objToWorld[11]
+        );
     }
 
     size_t normalCount = meshInfo.normals.size();
