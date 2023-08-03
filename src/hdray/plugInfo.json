@@ -1,0 +1,20 @@
+{
+  "Plugins": [
+    {
+      "Info": {
+        "Types": {
+          "HdRayRendererPlugin": {
+            "bases": [
+              "HdRendererPlugin"
+            ],
+            "displayName": "Ray",
+            "priority": 1
+          }
+        }
+      },
+      "LibraryPath": "hdRay.so",
+      "Name": "hdRay",
+      "Type": "library"
+    }
+  ]
+}
