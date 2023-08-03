@@ -5,8 +5,6 @@
 #include "rendererPlugin.h"
 #include "renderDelegate.h"
 
-#include <iostream>
-
 #include <pxr/imaging/hd/rendererPluginRegistry.h>
 
 PXR_NAMESPACE_OPEN_SCOPE

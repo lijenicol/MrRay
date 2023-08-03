@@ -130,8 +130,6 @@ HdRayMesh::Sync(
         meshMaterial
     );
     scene->addHittables(*_rayMesh->getTriangles());
-
-    std::cout << "Sync complete" << std::endl;
 }
 
 PXR_NAMESPACE_CLOSE_SCOPE

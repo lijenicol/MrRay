@@ -4,7 +4,6 @@
 
 #include "renderPass.h"
 
-#include <iostream>
 #include <pxr/imaging/hd/renderPassState.h>
 
 PXR_NAMESPACE_USING_DIRECTIVE
@@ -31,8 +30,6 @@ HdRayRenderPass::_Execute(
     const HdRenderPassStateSharedPtr &renderPassState,
     const TfTokenVector &renderTags)
 {
-    std::cout << "Executing render pass" << std::endl;
-
     bool needStartRender = false;
 
     const GfRect2i dataWindow = renderPassState->GetFraming().dataWindow;
@@ -62,7 +59,6 @@ HdRayRenderPass::_Execute(
         _aovBindings = aovBindings;
 
         if (aovBindings.empty()) {
-            std::cout << "Creating color AOV" << std::endl;
             HdRenderPassAovBinding colorAov;
             colorAov.aovName = HdAovTokens->color;
             colorAov.clearValue = VtValue(GfVec4f(0.1f, 0.f, 0.f, 1.f));
@@ -82,7 +78,6 @@ HdRayRenderPass::_Execute(
 bool
 HdRayRenderPass::IsConverged() const
 {
-    std::cout << "Chhecking convergence" << std::endl;
     for (size_t i = 0; i < _aovBindings.size(); ++i) {
         if (_aovBindings[i].renderBuffer &&
             !_aovBindings[i].renderBuffer->IsConverged()) {

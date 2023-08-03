@@ -1,6 +1,5 @@
 #include "renderDelegate.h"
 
-#include <iostream>
 #include "renderPass.h"
 #include "mesh.h"
 
@@ -27,7 +26,6 @@ static void
 _RenderCallback(
     HdRayRenderer *renderer, HdRenderThread *renderThread)
 {
-    std::cout << "Rendering!" << std::endl;
     renderer->Render(renderThread);
 }
 
@@ -49,8 +47,6 @@ HdRayRenderDelegate::HdRayRenderDelegate(
 void
 HdRayRenderDelegate::Initialize()
 {
-    std::cout << "Initializing render delegate..." << std::endl;
-
     _renderParam = std::make_shared<HdRayRenderParam>(
         _renderer.GetScene(), &_renderThread);
 
@@ -61,7 +57,6 @@ HdRayRenderDelegate::Initialize()
 
 HdRayRenderDelegate::~HdRayRenderDelegate()
 {
-    std::cout << "Destroying render delegate..." << std::endl;
 }
 
 const TfTokenVector &
@@ -92,7 +87,6 @@ HdRenderPassSharedPtr
 HdRayRenderDelegate::CreateRenderPass(
         HdRenderIndex *index, const HdRprimCollection &collection)
 {
-    std::cout << "Creating render pass" << std::endl;
     return std::make_shared<HdRayRenderPass>(
         index, collection, &_renderThread, &_renderer);
 }
@@ -114,7 +108,6 @@ HdRayRenderDelegate::DestroyInstancer(HdInstancer *instancer)
 HdRprim*
 HdRayRenderDelegate::CreateRprim(const TfToken &typeId, const SdfPath &rprimId)
 {
-    std::cout << "Creating Rprim: " << rprimId << std::endl;
     if (typeId == HdPrimTypeTokens->mesh) {
         return new HdRayMesh(rprimId);
     }
@@ -130,7 +123,6 @@ HdRayRenderDelegate::DestroyRprim(HdRprim *rPrim)
 HdSprim*
 HdRayRenderDelegate::CreateSprim(const TfToken &typeId, const SdfPath &sprimId)
 {
-    std::cout << "Creating Sprim: " << sprimId << std::endl;
     if (typeId == HdPrimTypeTokens->camera) {
         return new HdCamera(sprimId);
     }
@@ -140,7 +132,6 @@ HdRayRenderDelegate::CreateSprim(const TfToken &typeId, const SdfPath &sprimId)
 HdSprim*
 HdRayRenderDelegate::CreateFallbackSprim(const TfToken &typeId)
 {
-    std::cout << "Creating fallback Sprim: "<< typeId << std::endl;
     if (typeId == HdPrimTypeTokens->camera) {
         return new HdCamera(SdfPath::EmptyPath());
     }
@@ -156,7 +147,6 @@ HdRayRenderDelegate::DestroySprim(HdSprim *sPrim)
 HdBprim*
 HdRayRenderDelegate::CreateBprim(const TfToken &typeId, const SdfPath &bprimId)
 {
-    std::cout << "Creating Bprim: " << bprimId << std::endl;
     if (typeId == HdPrimTypeTokens->renderBuffer) {
         return new HdRayRenderBuffer(bprimId);
     }
@@ -166,7 +156,6 @@ HdRayRenderDelegate::CreateBprim(const TfToken &typeId, const SdfPath &bprimId)
 HdBprim*
 HdRayRenderDelegate::CreateFallbackBprim(const TfToken &typeId)
 {
-    std::cout << "Creating fallback Bprim: " << typeId << std::endl;
     if (typeId == HdPrimTypeTokens->renderBuffer) {
         return new HdRayRenderBuffer(SdfPath::EmptyPath());
     }
@@ -182,21 +171,18 @@ HdRayRenderDelegate::DestroyBprim(HdBprim *bprim)
 HdRenderParam*
 HdRayRenderDelegate::GetRenderParam() const
 {
-    std::cout << "Getting render param" << std::endl;
     return _renderParam.get();
 }
 
 void
 HdRayRenderDelegate::CommitResources(HdChangeTracker *tracker)
 {
-    std::cout << "Call to CommitResources" << std::endl;
 }
 
 HdAovDescriptor
 HdRayRenderDelegate::GetDefaultAovDescriptor(const TfToken &name) const
 {
     if (name == HdAovTokens->color) {
-        std::cout << "Getting aov desc for color" << std::endl;
         return HdAovDescriptor(HdFormatUNorm8Vec4, false,
                                VtValue(GfVec4f(0.f)));
     }

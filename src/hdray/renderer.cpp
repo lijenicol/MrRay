@@ -66,7 +66,6 @@ HdRayRenderer::Render(HdRenderThread *renderThread)
         rb->SetConverged(false);
     }
 
-    std::cout << "Rendering with " << width << "," << height << std::endl;
     _scene.setSkyboxTexture(
         std::make_shared<ray::SolidColour>(
             clearValue[0], clearValue[1], clearValue[2]));
@@ -83,7 +82,6 @@ HdRayRenderer::Render(HdRenderThread *renderThread)
     _engine.init(renderSettings);
     _engine.execute(renderSettings, &_scene);
 
-    std::cout << "writing to buffers" << std::endl;
     ray::Colour* colours = _engine.getFilm()->getData();
     for (auto const& aov : _aovBindings) {
         HdRayRenderBuffer *rb
