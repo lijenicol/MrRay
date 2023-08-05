@@ -89,7 +89,7 @@ int main(int argc, char** argv) {
 	const unsigned int tileSize = program.get<unsigned int>("--tilesize");
 	const std::string out = program.get<std::string>("out");
 	
-	RenderSettings renderSettings(width, height, spp, threads, tileSize, out);
+	RenderSettings renderSettings(width, height, spp, threads, tileSize);
     auto cornell = cornellBox(renderSettings);
 
     RenderEngine engine;
@@ -98,6 +98,6 @@ int main(int argc, char** argv) {
         Timer timer("execute");
         engine.execute(renderSettings, cornell.get());
     }
-    engine.getFilm()->writeToFile(renderSettings.outputPath);
+    engine.getFilm()->writeToFile(out);
 	return 0;
 }

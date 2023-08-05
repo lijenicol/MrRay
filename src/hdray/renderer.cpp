@@ -8,7 +8,6 @@
 #include <pxr/imaging/hd/camera.h>
 
 #include <ray/material/Material.h>
-#include <ray/geom/AARect.h>
 
 uint8_t remapColor(double colorComponent);
 
@@ -70,15 +69,7 @@ HdRayRenderer::Render(HdRenderThread *renderThread)
         std::make_shared<ray::SolidColour>(
             clearValue[0], clearValue[1], clearValue[2]));
 
-    ray::RenderSettings renderSettings(
-        width,
-        height,
-        10,
-        20,
-        64,
-        // TODO: This can go btw
-        ""
-    );
+    ray::RenderSettings renderSettings(width, height, 10, 20, 64);
     _engine.init(renderSettings);
     _engine.execute(renderSettings, &_scene);
 

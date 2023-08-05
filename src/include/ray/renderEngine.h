@@ -22,13 +22,11 @@ struct RenderSettings
     unsigned int samplesPerPixel;
     unsigned int threads;
     unsigned int tileSize;
-    std::string outputPath;
 
     RenderSettings(unsigned int w, unsigned int h, unsigned int spp,
-                   unsigned int threads, unsigned int tileSize,
-                   const std::string& outputPath)
+                   unsigned int threads, unsigned int tileSize)
         : imageWidth(w), imageHeight(h), samplesPerPixel(spp),
-          threads(threads), tileSize(tileSize), outputPath(outputPath)
+          threads(threads), tileSize(tileSize)
     {}
 
     RenderSettings(const RenderSettings& other)
