@@ -1,3 +1,3 @@
-add_subdirectory(librayengine)
-add_subdirectory(ray)
-add_subdirectory(hdray)
+add_subdirectory(mrRayEngine)
+add_subdirectory(mrRayDemo)
+add_subdirectory(hdMrRay)

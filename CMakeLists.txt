@@ -1,4 +1,4 @@
 cmake_minimum_required(VERSION 3.23.0)
-project(Ray)
+project(MrRay)
 
 add_subdirectory(src)

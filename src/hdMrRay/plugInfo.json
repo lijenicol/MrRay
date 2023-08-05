@@ -1,0 +1,20 @@
+{
+  "Plugins": [
+    {
+      "Info": {
+        "Types": {
+          "HdMrRayRendererPlugin": {
+            "bases": [
+              "HdRendererPlugin"
+            ],
+            "displayName": "MrRay",
+            "priority": 1
+          }
+        }
+      },
+      "LibraryPath": "hdMrRay.so",
+      "Name": "hdMrRay",
+      "Type": "library"
+    }
+  ]
+}
