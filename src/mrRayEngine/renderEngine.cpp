@@ -12,63 +12,77 @@
 #include "mrRay/material/material.h"
 #include "mrRay/timer.h"
 
+#define MAX_DEPTH 12
+
 MR_RAY_NAMESPACE_OPEN_SCOPE
 
-// Recursive function for calculating intersections and colour
+Colour rayColourHelper(
+    const Ray& r, const Scene& scene, MemoryArena& arena,
+    Sampler& sampler, int depth)
+{
+    // Rays that bounce between white objects may never terminate
+    // from the russian roulette process, this is a fail-safe
+    if (depth > MAX_DEPTH) {
+        return Colour(0, 0, 0);
+    }
+
+    // If the ray hits nothing, return the skybox colour
+    hit_record rec;
+    if (!scene.getWorld()->hit(r, 0.001, infinity, rec)) {
+        // Compute u,v of hit
+        double u, v;
+        Sphere::get_sphere_uv(unit_vector(r.direction()), u, v);
+        return scene.getSkyboxTexture()->value(u,v,rec);
+    }
+
+    Colour emitted = rec.mat->emitted(0,0,Vec3(0,0,0));	// needs to change when u,v coordinates is implemented
+    scatter_record srec;
+    if (!rec.mat->scatter(r, rec, srec, arena))
+        return emitted;
+
+    // If the generated ray is specular, then we do not need to sample directions
+    // (this is because the specular only has one possible scattering ray)
+    if (srec.isSpecular) {
+        return srec.attenuation
+               * rayColourHelper(srec.specularRay, scene, arena, sampler, depth)
+               * dot(rec.normal, srec.specularRay.direction());
+    }
+
+    // Determine russian roulette termination
+    //float maxChannel = fmax(fmax(srec.attenuation[0], srec.attenuation[1]), srec.attenuation[2]);
+    //float pContinue = 1 - maxChannel;
+    float pContinue = 1 - (srec.attenuation.length() / sqrt(3));
+    pContinue = pContinue < 0 ? 0 : pContinue;
+    float invpContinue = 1 / (1 - pContinue);
+    float randomRussian = sampler.getDouble();
+    if (randomRussian < pContinue) {
+        return Colour(0, 0, 0);
+    }
+
+    // Generate sample direction
+    double pdf = 0;
+    Ray scattered;
+    while (pdf == 0) {
+        // FIXME: Fix this now that lights aren't shared_ptr
+        // std::shared_ptr<HittablePDF> lightPDF = std::make_shared<HittablePDF>(lights, rec.p);
+        // MixturePDF mixPDF(srec.PDF_ptr, lightPDF);
+        // scattered = Ray(rec.p, mixPDF.generate());
+        scattered = Ray(rec.p, srec.PDF_ptr->generate(sampler));
+        pdf = srec.PDF_ptr->value(scattered.direction());
+    }
+
+    // Recursively scatter rays
+    return emitted + srec.attenuation * rec.mat->bsdf(r, rec, scattered)
+                     * dot(rec.normal, scattered.direction())
+                     * rayColourHelper(scattered, scene, arena, sampler, depth + 1)
+                     * invpContinue / pdf;
+}
+
 Colour
 ray_colour(const Ray& r, const Scene& scene, MemoryArena& arena,
            Sampler& sampler)
 {
-	// If the ray hits nothing, return the skybox colour
-	hit_record rec;
-	if (!scene.getWorld()->hit(r, 0.001, infinity, rec)) {
-		// Compute u,v of hit
-		double u, v;
-		Sphere::get_sphere_uv(unit_vector(r.direction()), u, v);
-		return scene.getSkyboxTexture()->value(u,v,rec);
-	}
-
-	Colour emitted = rec.mat->emitted(0,0,Vec3(0,0,0));	// needs to change when u,v coordinates is implemented
-	scatter_record srec;
-	if (!rec.mat->scatter(r, rec, srec, arena))
-		return emitted;
-
-	// If the generated ray is specular, then we do not need to sample directions
-	// (this is because the specular only has one possible scattering ray)
-	if (srec.isSpecular) {
-		return srec.attenuation
-			* ray_colour(srec.specularRay, scene, arena, sampler)
-			* dot(rec.normal, srec.specularRay.direction());
-	}
-
-	// Determine russian roulette termination
-	//float maxChannel = fmax(fmax(srec.attenuation[0], srec.attenuation[1]), srec.attenuation[2]);
-	//float pContinue = 1 - maxChannel;
-	float pContinue = 1 - (srec.attenuation.length() / sqrt(3));
-	pContinue = pContinue < 0 ? 0 : pContinue;
-	float invpContinue = 1 / (1 - pContinue);
-	float randomRussian = sampler.getDouble();
-	if (randomRussian < pContinue) {
-		return Colour(0, 0, 0);
-	}
-
-	// Generate sample direction
-	double pdf = 0;
-	Ray scattered;
-	while (pdf == 0) {
-		// FIXME: Fix this now that lights aren't shared_ptr
-		// std::shared_ptr<HittablePDF> lightPDF = std::make_shared<HittablePDF>(lights, rec.p);
-		// MixturePDF mixPDF(srec.PDF_ptr, lightPDF);
-		// scattered = Ray(rec.p, mixPDF.generate());
-		scattered = Ray(rec.p, srec.PDF_ptr->generate(sampler));
-		pdf = srec.PDF_ptr->value(scattered.direction());
-	}
-
-	// Recursively scatter rays
-	return emitted + srec.attenuation * rec.mat->bsdf(r, rec, scattered)
-		* dot(rec.normal, scattered.direction())
-		* ray_colour(scattered, scene, arena, sampler)
-		* invpContinue / pdf;
+    return rayColourHelper(r, scene, arena, sampler, 0);
 }
 
 void
