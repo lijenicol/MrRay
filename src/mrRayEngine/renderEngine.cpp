@@ -7,9 +7,9 @@
 #include <vector>
 #include <thread>
 
-#include "mrRay/PDF.h"
-#include "mrRay/geom/Sphere.h"
-#include "mrRay/material/Material.h"
+#include "mrRay/pdf.h"
+#include "mrRay/geom/sphere.h"
+#include "mrRay/material/material.h"
 #include "mrRay/timer.h"
 
 MR_RAY_NAMESPACE_OPEN_SCOPE

@@ -5,10 +5,9 @@
 #include <mutex>
 
 #include "mrRay/namespace.h"
-#include "mrRay/Camera.h"
-#include "mrRay/geom/Sphere.h"
-#include "mrRay/geom/HittableList.h"
-#include "mrRay/material/Texture.h"
+#include "mrRay/camera.h"
+#include "mrRay/geom/hittableList.h"
+#include "mrRay/material/texture.h"
 
 MR_RAY_NAMESPACE_OPEN_SCOPE
 

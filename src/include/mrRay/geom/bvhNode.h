@@ -1,8 +1,8 @@
 #pragma once
 #include "mrRay/namespace.h"
 #include "mrRay/rtutils.h"
-#include "mrRay/geom/Hittable.h"
-#include "mrRay/geom/HittableList.h"
+#include "mrRay/geom/hittable.h"
+#include "mrRay/geom/hittableList.h"
 
 MR_RAY_NAMESPACE_OPEN_SCOPE
 

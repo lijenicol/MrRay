@@ -4,7 +4,7 @@
 
 #include "mesh.h"
 #include "renderParam.h"
-#include <mrRay/material/Material.h>
+#include <mrRay/material/material.h>
 #include <mrRay/matrix.h>
 
 PXR_NAMESPACE_OPEN_SCOPE

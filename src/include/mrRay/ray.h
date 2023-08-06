@@ -2,7 +2,7 @@
 #define MR_RAY_H
 
 #include "mrRay/namespace.h"
-#include "mrRay/Vec3.h"
+#include "mrRay/vec3.h"
 
 MR_RAY_NAMESPACE_OPEN_SCOPE
 

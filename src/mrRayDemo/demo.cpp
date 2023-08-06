@@ -3,13 +3,14 @@
 
 #include "argparse/argparse.hpp"
 
-#include "mrRay/Camera.h"
+#include "mrRay/camera.h"
 #include "mrRay/renderEngine.h"
 #include "mrRay/timer.h"
 
-#include "mrRay/geom/AARect.h"
+#include "mrRay/geom/aaRect.h"
+#include "mrRay/geom/sphere.h"
 
-#include "mrRay/material/Material.h"
+#include "mrRay/material/material.h"
 
 MR_RAY_NAMESPACE_USING_DIRECTIVE
 

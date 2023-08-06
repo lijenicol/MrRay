@@ -2,9 +2,9 @@
 
 #include <memory>
 
-#include "mrRay/material/Material.h"
+#include "mrRay/material/material.h"
 
-#include "mrRay/geom/BVHNode.h"
+#include "mrRay/geom/bvhNode.h"
 
 MR_RAY_NAMESPACE_OPEN_SCOPE
 

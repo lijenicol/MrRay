@@ -2,9 +2,9 @@
 #include "mrRay/namespace.h"
 #include "mrRay/rtutils.h"
 #include "mrRay/sampler.h"
-#include "mrRay/ONB.h"
+#include "mrRay/onb.h"
 
-#include "mrRay/geom/Hittable.h"
+#include "mrRay/geom/hittable.h"
 
 MR_RAY_NAMESPACE_OPEN_SCOPE
 

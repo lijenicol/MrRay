@@ -8,8 +8,8 @@
 #include "mrRay/namespace.h"
 #include "mrRay/rtutils.h"
 #include "mrRay/matrix.h"
-#include "mrRay/geom/HittableList.h"
-#include "mrRay/geom/Triangle.h"
+#include "mrRay/geom/hittableList.h"
+#include "mrRay/geom/triangle.h"
 
 MR_RAY_NAMESPACE_OPEN_SCOPE
 

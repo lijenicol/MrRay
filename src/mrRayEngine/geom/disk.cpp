@@ -1,4 +1,4 @@
-#include "mrRay/geom/Disk.h"
+#include "mrRay/geom/disk.h"
 
 MR_RAY_NAMESPACE_OPEN_SCOPE
 

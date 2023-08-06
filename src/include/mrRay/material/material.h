@@ -3,9 +3,9 @@
 
 #include "mrRay/namespace.h"
 #include "mrRay/memory.h"
-#include "mrRay/PDF.h"
+#include "mrRay/pdf.h"
 #include "mrRay/rtutils.h"
-#include "mrRay/material/Texture.h"
+#include "mrRay/material/texture.h"
 
 MR_RAY_NAMESPACE_OPEN_SCOPE
 

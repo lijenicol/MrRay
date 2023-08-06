@@ -1,4 +1,4 @@
-#include "mrRay/geom/Transform.h"
+#include "mrRay/geom/transform.h"
 
 MR_RAY_NAMESPACE_OPEN_SCOPE
 

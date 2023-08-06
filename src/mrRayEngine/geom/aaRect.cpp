@@ -1,4 +1,4 @@
-#include "mrRay/geom/AARect.h"
+#include "mrRay/geom/aaRect.h"
 
 MR_RAY_NAMESPACE_OPEN_SCOPE
 

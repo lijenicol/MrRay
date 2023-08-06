@@ -5,7 +5,7 @@
 #include <fstream>
 
 #include "mrRay/geom/meshLoader.h"
-#include "mrRay/material/Material.h"
+#include "mrRay/material/material.h"
 
 MR_RAY_NAMESPACE_OPEN_SCOPE
 

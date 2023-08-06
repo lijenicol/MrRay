@@ -1,12 +1,12 @@
 target_sources(mrRayEngine
-    PRIVATE 
-        AARect.cpp
-        BVHNode.cpp
-        Disk.cpp
-        HittableList.cpp
+    PRIVATE
+        aaRect.cpp
+        bvhNode.cpp
+        disk.cpp
+        hittableList.cpp
         mesh.cpp
         meshLoader.cpp
-        Sphere.cpp
-        Transform.cpp
-        Triangle.cpp
+        sphere.cpp
+        transform.cpp
+        triangle.cpp
 )

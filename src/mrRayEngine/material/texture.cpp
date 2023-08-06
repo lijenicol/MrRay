@@ -1,6 +1,6 @@
-#include "mrRay/rt_stb_image.h"
-#include "mrRay/geom/Hittable.h"
-#include "mrRay/material/Texture.h"
+#include "mrRay/rtStbImage.h"
+#include "mrRay/geom/hittable.h"
+#include "mrRay/material/texture.h"
 
 MR_RAY_NAMESPACE_OPEN_SCOPE
 

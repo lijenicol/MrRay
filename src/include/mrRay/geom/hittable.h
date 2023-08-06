@@ -2,7 +2,7 @@
 
 #include "mrRay/namespace.h"
 #include "mrRay/rtutils.h"
-#include "mrRay/AABB.h"
+#include "mrRay/aabb.h"
 
 MR_RAY_NAMESPACE_OPEN_SCOPE
 

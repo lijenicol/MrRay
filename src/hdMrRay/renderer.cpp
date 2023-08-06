@@ -7,7 +7,7 @@
 
 #include <pxr/imaging/hd/camera.h>
 
-#include <mrRay/material/Material.h>
+#include <mrRay/material/material.h>
 
 uint8_t remapColor(double colorComponent);
 

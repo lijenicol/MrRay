@@ -4,8 +4,6 @@
 
 #include <OpenImageIO/imageio.h>
 
-#include "mrRay/Colour.h"
-
 MR_RAY_NAMESPACE_OPEN_SCOPE
 
 void Film::writeTile(const Tile& tile)

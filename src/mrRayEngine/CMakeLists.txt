@@ -1,9 +1,8 @@
 add_library(mrRayEngine SHARED)
 
 target_sources(mrRayEngine
-    PRIVATE 
-        AABB.cpp
-        Colour.cpp
+    PRIVATE
+        aabb.cpp
         film.cpp
         scene.cpp
         timer.cpp

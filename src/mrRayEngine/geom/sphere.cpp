@@ -1,4 +1,4 @@
-#include "mrRay/geom/Sphere.h"
+#include "mrRay/geom/sphere.h"
 #include <iostream>
 
 MR_RAY_NAMESPACE_OPEN_SCOPE

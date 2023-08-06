@@ -1,6 +1,6 @@
 #pragma once
 #include "mrRay/namespace.h"
-#include "mrRay/geom/Hittable.h"
+#include "mrRay/geom/hittable.h"
 
 #include <vector>
 #include <memory>

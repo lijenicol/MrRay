@@ -45,5 +45,5 @@ MR_RAY_NAMESPACE_CLOSE_SCOPE
 
 // Common Headers
 
-#include "Vec3.h"
-#include "Ray.h"
+#include "vec3.h"
+#include "ray.h"

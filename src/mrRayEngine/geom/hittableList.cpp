@@ -1,4 +1,4 @@
-#include "mrRay/geom/HittableList.h"
+#include "mrRay/geom/hittableList.h"
 
 MR_RAY_NAMESPACE_OPEN_SCOPE
 

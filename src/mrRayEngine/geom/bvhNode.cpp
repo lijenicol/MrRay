@@ -1,5 +1,5 @@
 #include <algorithm>
-#include "mrRay/geom/BVHNode.h"
+#include "mrRay/geom/bvhNode.h"
 
 MR_RAY_NAMESPACE_OPEN_SCOPE
 

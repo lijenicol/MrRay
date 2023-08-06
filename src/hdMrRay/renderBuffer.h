@@ -7,7 +7,6 @@
 
 #include "pxr/pxr.h"
 #include <pxr/imaging/hd/renderBuffer.h>
-#include <mrRay/Colour.h>
 
 PXR_NAMESPACE_OPEN_SCOPE
 

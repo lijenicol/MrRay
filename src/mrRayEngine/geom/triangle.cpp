@@ -1,4 +1,4 @@
-#include "mrRay/geom/Triangle.h"
+#include "mrRay/geom/triangle.h"
 
 MR_RAY_NAMESPACE_OPEN_SCOPE
 

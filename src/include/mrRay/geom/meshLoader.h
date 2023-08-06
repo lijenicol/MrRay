@@ -6,8 +6,8 @@
 #define MR_RAY_OBJLOADER_H
 
 #include "mrRay/namespace.h"
-#include "mrRay/geom/HittableList.h"
-#include "mrRay/geom/Triangle.h"
+#include "mrRay/geom/hittableList.h"
+#include "mrRay/geom/triangle.h"
 #include "mrRay/geom/mesh.h"
 
 MR_RAY_NAMESPACE_OPEN_SCOPE
