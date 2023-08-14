@@ -22,6 +22,8 @@ public:
 
     void SetAovBindings(HdRenderPassAovBindingVector const &aovBindings)
         { _aovBindings = aovBindings; }
+    HdRenderPassAovBindingVector const& GetAovBindings() const
+        { return _aovBindings; }
     void SetDataWindow(const GfRect2i &dataWindow)
         { _dataWindow = dataWindow; }
     void SetCamera(const HdCamera &camera);

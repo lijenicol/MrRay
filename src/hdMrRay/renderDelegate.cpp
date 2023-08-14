@@ -183,8 +183,8 @@ HdAovDescriptor
 HdMrRayRenderDelegate::GetDefaultAovDescriptor(const TfToken &name) const
 {
     if (name == HdAovTokens->color) {
-        return HdAovDescriptor(HdFormatUNorm8Vec4, false,
-                               VtValue(GfVec4f(0.f)));
+        return HdAovDescriptor(HdFormatFloat32Vec4, false,
+                               VtValue(GfVec4f(1.f)));
     }
     return HdAovDescriptor();
 }

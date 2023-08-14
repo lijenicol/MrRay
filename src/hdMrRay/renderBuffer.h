@@ -57,7 +57,7 @@ protected:
 
     std::atomic<int> _mappers;
     std::atomic<bool> _converged;
-    std::vector<uint8_t> _buffer;
+    std::vector<float> _buffer;
 };
 
 PXR_NAMESPACE_CLOSE_SCOPE

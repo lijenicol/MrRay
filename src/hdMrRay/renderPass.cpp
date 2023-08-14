@@ -32,11 +32,38 @@ HdMrRayRenderPass::_Execute(
 {
     bool needStartRender = false;
 
-    const GfRect2i dataWindow = renderPassState->GetFraming().dataWindow;
+    const CameraUtilFraming &framing = renderPassState->GetFraming();
+    GfRect2i dataWindow;
+    if (framing.IsValid()) {
+        dataWindow = framing.dataWindow;
+    } else {
+        // For applications that use the old viewport API instead of
+        // the new camera framing API.
+        const GfVec4f vp = renderPassState->GetViewport();
+        dataWindow = GfRect2i(GfVec2i(0), int(vp[2]), int(vp[3]));
+    }
     if (_dataWindow != dataWindow) {
         _dataWindow = dataWindow;
-        _renderer->SetDataWindow(_dataWindow);
         _renderThread->StopRender();
+        _renderer->SetDataWindow(_dataWindow);
+
+        if (!framing.IsValid()) {
+            // Support clients that do not use the new framing API
+            // and do not use AOVs.
+            //
+            // Note that we do not support the case of using the
+            // new camera framing API without using AOVs.
+            //
+            const GfVec3i dimensions(_dataWindow.GetWidth(),
+                                     _dataWindow.GetHeight(),
+                                     1);
+
+            _colorBuffer.Allocate(
+                dimensions,
+                HdFormatUNorm8Vec4,
+                /*multiSampled=*/false);
+        }
+
         needStartRender = true;
     }
 
@@ -54,18 +81,18 @@ HdMrRayRenderPass::_Execute(
 
     HdRenderPassAovBindingVector aovBindings
         = renderPassState->GetAovBindings();
-    if (_aovBindings != aovBindings)
+    if (_aovBindings != aovBindings || _renderer->GetAovBindings().empty())
     {
         _aovBindings = aovBindings;
 
+        _renderThread->StopRender();
         if (aovBindings.empty()) {
             HdRenderPassAovBinding colorAov;
             colorAov.aovName = HdAovTokens->color;
-            colorAov.clearValue = VtValue(GfVec4f(0.1f, 0.f, 0.f, 1.f));
+            colorAov.clearValue = VtValue(GfVec4f(0.1f, 0.1f, 0.1f, 1.f));
             colorAov.renderBuffer = &_colorBuffer;
             aovBindings.push_back(colorAov);
         }
-
         _renderer->SetAovBindings(aovBindings);
         needStartRender = true;
     }

@@ -9,7 +9,7 @@
 
 #include <mrRay/material/material.h>
 
-uint8_t remapColor(double colorComponent);
+float remapColor(double colorComponent);
 
 PXR_NAMESPACE_OPEN_SCOPE
 
@@ -77,7 +77,7 @@ HdMrRayRenderer::Render(HdRenderThread *renderThread)
     for (auto const& aov : _aovBindings) {
         HdMrRayRenderBuffer *rb
             = static_cast<HdMrRayRenderBuffer*>(aov.renderBuffer);
-        auto *target = (uint8_t*)rb->Map();
+        auto *target = (float*)rb->Map();
         for (size_t y = 0; y < height; y++) {
             for (size_t x = 0; x < width; x++) {
                 size_t index = y * width + x;
@@ -95,8 +95,8 @@ HdMrRayRenderer::Render(HdRenderThread *renderThread)
 
 PXR_NAMESPACE_CLOSE_SCOPE
 
-uint8_t
+float
 remapColor(double colorComponent)
 {
-    return (uint8_t)(255 * mrRay::clamp(colorComponent, 0, 1));
+    return (float)colorComponent;
 }
