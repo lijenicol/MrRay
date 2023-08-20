@@ -29,6 +29,18 @@ public:
     void SetCamera(const HdCamera &camera);
     mrRay::Scene* GetScene() { return &_scene; }
 
+    void SetSamplesPerPixel(unsigned int spp) {
+        _samplesPerPixel = spp;
+    }
+
+    void SetTileSize(unsigned int tileSize) {
+        _tileSize = tileSize;
+    }
+
+    void SetRenderThreads(unsigned int threads) {
+        _renderThreads = threads;
+    }
+
     void Render(HdRenderThread *renderThread);
 
 private:
@@ -39,6 +51,10 @@ private:
 
     mrRay::RenderEngine _engine;
     mrRay::Scene _scene;
+
+    unsigned int _samplesPerPixel;
+    unsigned int _tileSize;
+    unsigned int _renderThreads;
 };
 
 PXR_NAMESPACE_CLOSE_SCOPE

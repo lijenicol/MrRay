@@ -32,6 +32,8 @@ private:
     HdRenderThread *_renderThread;
     HdMrRayRenderer *_renderer;
 
+    unsigned int _lastSettingsVersion;
+
     // Previous data window
     GfRect2i _dataWindow;
 

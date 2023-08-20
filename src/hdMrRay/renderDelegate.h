@@ -16,6 +16,11 @@
 
 PXR_NAMESPACE_OPEN_SCOPE
 
+#define HDMRRAY_RENDER_SETTINGS_TOKENS \
+    (tileSize)
+
+TF_DECLARE_PUBLIC_TOKENS(HdMrRayRenderSettingsTokens, HDMRRAY_RENDER_SETTINGS_TOKENS);
+
 class HdMrRayRenderDelegate final: public HdRenderDelegate
 {
 public:
@@ -57,6 +62,7 @@ public:
     HdRenderParam *GetRenderParam() const override;
 
     HdAovDescriptor GetDefaultAovDescriptor(const TfToken &name) const override;
+    HdRenderSettingDescriptorList GetRenderSettingDescriptors() const override;
 
 private:
     void Initialize();
@@ -68,6 +74,7 @@ private:
     HdRenderThread _renderThread;
     HdMrRayRenderer _renderer;
     std::shared_ptr<HdMrRayRenderParam> _renderParam;
+    HdRenderSettingDescriptorList _settingDescriptors;
 };
 
 PXR_NAMESPACE_CLOSE_SCOPE

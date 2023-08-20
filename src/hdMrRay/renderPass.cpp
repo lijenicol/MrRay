@@ -3,6 +3,8 @@
 //
 
 #include "renderPass.h"
+#include "config.h"
+#include "renderDelegate.h"
 
 #include <pxr/imaging/hd/renderPassState.h>
 
@@ -15,6 +17,7 @@ HdMrRayRenderPass::HdMrRayRenderPass(
     , _colorBuffer(SdfPath::EmptyPath())
     , _renderThread(renderThread)
     , _renderer(renderer)
+    , _lastSettingsVersion(0)
     , _viewMatrix(1.0f) // == identity
     , _projMatrix(1.0f) // == identity
 {
@@ -31,6 +34,29 @@ HdMrRayRenderPass::_Execute(
     const TfTokenVector &renderTags)
 {
     bool needStartRender = false;
+
+    HdRenderDelegate *renderDelegate = GetRenderIndex()->GetRenderDelegate();
+    unsigned int currentSettingsVersion
+        = renderDelegate->GetRenderSettingsVersion();
+    if (_lastSettingsVersion != currentSettingsVersion) {
+        _renderThread->StopRender();
+        _lastSettingsVersion = currentSettingsVersion;
+
+        _renderer->SetSamplesPerPixel(
+            (unsigned int)renderDelegate->GetRenderSetting<int>(
+                HdRenderSettingsTokens->convergedSamplesPerPixel,
+                (int)HdMrRayConfig::GetInstance().samplesPerPixel));
+        _renderer->SetTileSize(
+            (unsigned int)renderDelegate->GetRenderSetting<int>(
+                HdMrRayRenderSettingsTokens->tileSize,
+                (int)HdMrRayConfig::GetInstance().tileSize));
+        _renderer->SetRenderThreads(
+            (unsigned int)renderDelegate->GetRenderSetting<int>(
+                HdRenderSettingsTokens->threadLimit,
+                (int)HdMrRayConfig::GetInstance().threads));
+
+        needStartRender = true;
+    }
 
     const CameraUtilFraming &framing = renderPassState->GetFraming();
     GfRect2i dataWindow;

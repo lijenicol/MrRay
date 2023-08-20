@@ -13,6 +13,7 @@ target_link_libraries(hdMrRay PRIVATE hd mrRayEngine)
 
 target_sources(hdMrRay
     PRIVATE
+        config.cpp
         mesh.cpp
         renderBuffer.cpp
         renderDelegate.cpp

@@ -1,11 +1,15 @@
 #include "renderDelegate.h"
 
+#include "config.h"
 #include "renderPass.h"
 #include "mesh.h"
 
 #include <pxr/imaging/hd/camera.h>
 
 PXR_NAMESPACE_OPEN_SCOPE
+
+TF_DEFINE_PUBLIC_TOKENS(
+    HdMrRayRenderSettingsTokens, HDMRRAY_RENDER_SETTINGS_TOKENS);
 
 const TfTokenVector HdMrRayRenderDelegate::SUPPORTED_RPRIM_TYPES =
 {
@@ -47,6 +51,21 @@ HdMrRayRenderDelegate::HdMrRayRenderDelegate(
 void
 HdMrRayRenderDelegate::Initialize()
 {
+    _settingDescriptors.resize(3);
+    _settingDescriptors[0] = {
+        "Samples Per Pixel",
+        HdRenderSettingsTokens->convergedSamplesPerPixel,
+        VtValue(int(HdMrRayConfig::GetInstance().samplesPerPixel))};
+    _settingDescriptors[1] = {
+        "Tile Size",
+        HdMrRayRenderSettingsTokens->tileSize,
+        VtValue(int(HdMrRayConfig::GetInstance().tileSize))};
+    _settingDescriptors[2] = {
+        "Render Threads",
+        HdRenderSettingsTokens->threadLimit,
+        VtValue(int(HdMrRayConfig::GetInstance().threads))};
+    _PopulateDefaultSettings(_settingDescriptors);
+
     _renderParam = std::make_shared<HdMrRayRenderParam>(
         _renderer.GetScene(), &_renderThread);
 
@@ -188,5 +207,12 @@ HdMrRayRenderDelegate::GetDefaultAovDescriptor(const TfToken &name) const
     }
     return HdAovDescriptor();
 }
+
+HdRenderSettingDescriptorList
+HdMrRayRenderDelegate::GetRenderSettingDescriptors() const
+{
+    return _settingDescriptors;
+}
+
 
 PXR_NAMESPACE_CLOSE_SCOPE

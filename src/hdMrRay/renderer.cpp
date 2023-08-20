@@ -2,6 +2,7 @@
 // Created by lijenicol on 12/07/23.
 //
 
+#include "config.h"
 #include "renderer.h"
 #include "renderBuffer.h"
 
@@ -69,7 +70,8 @@ HdMrRayRenderer::Render(HdRenderThread *renderThread)
         std::make_shared<mrRay::SolidColour>(
             clearValue[0], clearValue[1], clearValue[2]));
 
-    mrRay::RenderSettings renderSettings(width, height, 10, 20, 64);
+    mrRay::RenderSettings renderSettings(
+        width, height, _samplesPerPixel, _renderThreads, _tileSize);
     _engine.init(renderSettings);
     _engine.execute(renderSettings, &_scene);
 
