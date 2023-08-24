@@ -2,15 +2,19 @@
 // Created by lijenicol on 18/06/23.
 //
 
+#include "renderBuffer.h"
 #include <iostream>
 #include <pxr/base/gf/vec3i.h>
-#include "renderBuffer.h"
 
 PXR_NAMESPACE_USING_DIRECTIVE
 
-HdMrRayRenderBuffer::HdMrRayRenderBuffer(SdfPath const& id)
-    : HdRenderBuffer(id), _width(0), _height(0), _buffer(),
-      _mappers(0), _converged(false)
+HdMrRayRenderBuffer::HdMrRayRenderBuffer(SdfPath const &id)
+    : HdRenderBuffer(id)
+    , _width(0)
+    , _height(0)
+    , _buffer()
+    , _mappers(0)
+    , _converged(false)
 {
 }
 
@@ -49,8 +53,8 @@ HdMrRayRenderBuffer::Allocate(
     return true;
 }
 
-void
-*HdMrRayRenderBuffer::Map()
+void *
+HdMrRayRenderBuffer::Map()
 {
     _mappers++;
     return _buffer.data();

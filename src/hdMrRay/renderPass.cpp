@@ -80,9 +80,8 @@ HdMrRayRenderPass::_Execute(
             // Note that we do not support the case of using the
             // new camera framing API without using AOVs.
             //
-            const GfVec3i dimensions(_dataWindow.GetWidth(),
-                                     _dataWindow.GetHeight(),
-                                     1);
+            const GfVec3i dimensions(
+                _dataWindow.GetWidth(), _dataWindow.GetHeight(), 1);
 
             _colorBuffer.Allocate(
                 dimensions,
@@ -105,10 +104,8 @@ HdMrRayRenderPass::_Execute(
         needStartRender = true;
     }
 
-    HdRenderPassAovBindingVector aovBindings
-        = renderPassState->GetAovBindings();
-    if (_aovBindings != aovBindings || _renderer->GetAovBindings().empty())
-    {
+    HdRenderPassAovBindingVector aovBindings = renderPassState->GetAovBindings();
+    if (_aovBindings != aovBindings || _renderer->GetAovBindings().empty()) {
         _aovBindings = aovBindings;
 
         _renderThread->StopRender();
@@ -132,8 +129,9 @@ bool
 HdMrRayRenderPass::IsConverged() const
 {
     for (size_t i = 0; i < _aovBindings.size(); ++i) {
-        if (_aovBindings[i].renderBuffer &&
-            !_aovBindings[i].renderBuffer->IsConverged()) {
+        if (_aovBindings[i].renderBuffer
+            && !_aovBindings[i].renderBuffer->IsConverged())
+        {
             return false;
         }
     }

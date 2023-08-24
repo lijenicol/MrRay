@@ -2,8 +2,8 @@
 // Created by lijenicol on 12/07/23.
 //
 
-#include "config.h"
 #include "renderer.h"
+#include "config.h"
 #include "renderBuffer.h"
 
 #include <pxr/imaging/hd/camera.h>
@@ -34,19 +34,16 @@ HdMrRayRenderer::SetCamera(const HdCamera &camera)
     GfVec4d lookAt = GfVec4d(0, 0, -1, 1) * transform;
     GfVec4d vup = GfVec4d(0, 1, 0, 0) * transform;
     double vfovRadians
-        = 2 * atan(
-            camera.GetVerticalAperture() / (2 * camera.GetFocalLength()));
-    _scene.setMainCam(
-        std::make_shared<mrRay::Camera>(
-            mrRay::Point3(translation[0], translation[1], translation[2]),
-            mrRay::Point3(lookAt[0], lookAt[1], lookAt[2]),
-            mrRay::Vec3(vup[0], vup[1], vup[2]),
-            vfovRadians * 180 / mrRay::pi,
-            _dataWindow.GetWidth() / (double)_dataWindow.GetHeight(),
-            // TODO: Correct aperture
-            0.0,
-            10)
-    );
+        = 2 * atan(camera.GetVerticalAperture() / (2 * camera.GetFocalLength()));
+    _scene.setMainCam(std::make_shared<mrRay::Camera>(
+        mrRay::Point3(translation[0], translation[1], translation[2]),
+        mrRay::Point3(lookAt[0], lookAt[1], lookAt[2]),
+        mrRay::Vec3(vup[0], vup[1], vup[2]),
+        vfovRadians * 180 / mrRay::pi,
+        _dataWindow.GetWidth() / (double)_dataWindow.GetHeight(),
+        // TODO: Correct aperture
+        0.0,
+        10));
 }
 
 void
@@ -56,30 +53,29 @@ HdMrRayRenderer::Render(HdRenderThread *renderThread)
     //   For now, this should be good as we only have one AOV
     unsigned int width, height;
     GfVec4f clearValue;
-    for (auto const& aov : _aovBindings) {
+    for (auto const &aov: _aovBindings) {
         HdMrRayRenderBuffer *rb
-            = static_cast<HdMrRayRenderBuffer*>(aov.renderBuffer);
+            = static_cast<HdMrRayRenderBuffer *>(aov.renderBuffer);
         width = rb->GetWidth();
         height = rb->GetHeight();
-        clearValue =
-            *(static_cast<const GfVec4f*>(HdGetValueData(aov.clearValue)));
+        clearValue
+            = *(static_cast<const GfVec4f *>(HdGetValueData(aov.clearValue)));
         rb->SetConverged(false);
     }
 
-    _scene.setSkyboxTexture(
-        std::make_shared<mrRay::SolidColour>(
-            clearValue[0], clearValue[1], clearValue[2]));
+    _scene.setSkyboxTexture(std::make_shared<mrRay::SolidColour>(
+        clearValue[0], clearValue[1], clearValue[2]));
 
     mrRay::RenderSettings renderSettings(
         width, height, _samplesPerPixel, _renderThreads, _tileSize);
     _engine.init(renderSettings);
     _engine.execute(renderSettings, &_scene);
 
-    mrRay::Colour* colours = _engine.getFilm()->getData();
-    for (auto const& aov : _aovBindings) {
+    mrRay::Colour *colours = _engine.getFilm()->getData();
+    for (auto const &aov: _aovBindings) {
         HdMrRayRenderBuffer *rb
-            = static_cast<HdMrRayRenderBuffer*>(aov.renderBuffer);
-        auto *target = (float*)rb->Map();
+            = static_cast<HdMrRayRenderBuffer *>(aov.renderBuffer);
+        auto *target = (float *)rb->Map();
         for (size_t y = 0; y < height; y++) {
             for (size_t x = 0; x < width; x++) {
                 size_t index = y * width + x;

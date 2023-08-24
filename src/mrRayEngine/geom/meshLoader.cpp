@@ -9,8 +9,9 @@
 
 MR_RAY_NAMESPACE_OPEN_SCOPE
 
-MeshLoader::MeshLoader(const std::string& meshPath)
-    : _meshPath(meshPath), _hasLoaded(false)
+MeshLoader::MeshLoader(const std::string &meshPath)
+    : _meshPath(meshPath)
+    , _hasLoaded(false)
 {
     _loadedMeshInfo = new RawMeshInfo;
 }
@@ -20,7 +21,7 @@ MeshLoader::~MeshLoader()
     delete _loadedMeshInfo;
 }
 
-RawMeshInfo*
+RawMeshInfo *
 MeshLoader::getMeshInfo() const
 {
     if (_hasLoaded) {
@@ -30,7 +31,8 @@ MeshLoader::getMeshInfo() const
 }
 
 /// Split a string into multiple pieces at delimiter points
-std::vector<std::string> splitString(std::string s, char delimiter)
+std::vector<std::string>
+splitString(std::string s, char delimiter)
 {
     std::vector<std::string> splits;
 
@@ -56,7 +58,7 @@ bool
 OBJLoader::load()
 {
     std::ifstream objStream(_meshPath);
-    if(!objStream.is_open()) {
+    if (!objStream.is_open()) {
         std::cerr << "File cannot be read or does not exist: " << _meshPath
                   << std::endl;
         return false;
@@ -77,7 +79,8 @@ OBJLoader::load()
         }
 
         // Parse normals
-        else if (parts[0] == "vn") {
+        else if (parts[0] == "vn")
+        {
             Vec3 normal;
             normal.e[0] = std::stod(parts[1]);
             normal.e[1] = std::stod(parts[2]);
@@ -86,7 +89,8 @@ OBJLoader::load()
         }
 
         // Parse texture coords
-        else if (parts[0] == "vt") {
+        else if (parts[0] == "vt")
+        {
             Vec3 texCoord;
             texCoord.e[0] = std::stod(parts[1]);
             texCoord.e[1] = std::stod(parts[2]);
@@ -94,17 +98,18 @@ OBJLoader::load()
         }
 
         // Parse faces
-        else if (parts[0] == "f") {
+        else if (parts[0] == "f")
+        {
             for (int vertexIndex = 0; vertexIndex < 3; vertexIndex++) {
                 auto vertexInfo = splitString(parts[vertexIndex + 1], '/');
-                _loadedMeshInfo->positionIndices
-                    .push_back(std::stoi(vertexInfo[0]) - 1);
+                _loadedMeshInfo->positionIndices.push_back(
+                    std::stoi(vertexInfo[0]) - 1);
                 if (vertexInfo[1] != "") {
-                    _loadedMeshInfo->uvIndices
-                        .push_back(std::stoi(vertexInfo[1]) - 1);
+                    _loadedMeshInfo->uvIndices.push_back(
+                        std::stoi(vertexInfo[1]) - 1);
                 }
-                _loadedMeshInfo->normalIndices
-                    .push_back(std::stoi(vertexInfo[2]) - 1);
+                _loadedMeshInfo->normalIndices.push_back(
+                    std::stoi(vertexInfo[2]) - 1);
             }
         }
     }

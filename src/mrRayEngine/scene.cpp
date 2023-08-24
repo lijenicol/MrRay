@@ -9,12 +9,13 @@
 MR_RAY_NAMESPACE_OPEN_SCOPE
 
 Scene::Scene()
-    : _mainCamera(nullptr),
-      _skyboxTexture(std::make_shared<SolidColour>(0, 0, 0)),
-      _rawHittables(std::make_shared<HittableList>()),
-      _hittableListDirty(false),
-      _sceneMutex()
-{}
+    : _mainCamera(nullptr)
+    , _skyboxTexture(std::make_shared<SolidColour>(0, 0, 0))
+    , _rawHittables(std::make_shared<HittableList>())
+    , _hittableListDirty(false)
+    , _sceneMutex()
+{
+}
 
 void
 Scene::init()
@@ -28,7 +29,7 @@ Scene::init()
 }
 
 void
-Scene::addHittable(const std::shared_ptr<Hittable>& hittable)
+Scene::addHittable(const std::shared_ptr<Hittable> &hittable)
 {
     std::lock_guard<std::recursive_mutex> lock(_sceneMutex);
     _rawHittables->add(hittable);
@@ -36,16 +37,15 @@ Scene::addHittable(const std::shared_ptr<Hittable>& hittable)
 }
 
 void
-Scene::addHittables(const HittableList& hittableList)
+Scene::addHittables(const HittableList &hittableList)
 {
     std::lock_guard<std::recursive_mutex> lock(_sceneMutex);
-    for (auto const& hittable : hittableList.objects)
-    {
+    for (auto const &hittable: hittableList.objects) {
         this->addHittable(hittable);
     }
 }
 
-Hittable*
+Hittable *
 Scene::getWorld() const
 {
     return _world.get();

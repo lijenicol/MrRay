@@ -15,15 +15,15 @@ TF_REGISTRY_FUNCTION(TfType)
     HdRendererPluginRegistry::Define<HdMrRayRendererPlugin>();
 }
 
-HdRenderDelegate*
+HdRenderDelegate *
 HdMrRayRendererPlugin::CreateRenderDelegate()
 {
     return new HdMrRayRenderDelegate();
 }
 
-HdRenderDelegate*
+HdRenderDelegate *
 HdMrRayRendererPlugin::CreateRenderDelegate(
-    HdRenderSettingsMap const& settingsMap)
+    HdRenderSettingsMap const &settingsMap)
 {
     return new HdMrRayRenderDelegate(settingsMap);
 }

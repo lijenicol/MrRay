@@ -19,7 +19,7 @@ HdMrRayConfig::HdMrRayConfig()
 {
 }
 
-const HdMrRayConfig&
+const HdMrRayConfig &
 HdMrRayConfig::GetInstance()
 {
     return TfSingleton<HdMrRayConfig>::GetInstance();
