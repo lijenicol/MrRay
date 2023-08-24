@@ -12,10 +12,11 @@ MR_RAY_NAMESPACE_OPEN_SCOPE
 class Mat4
 {
 public:
-    Mat4(double m00, double m01, double m02, double m03,
-         double m10, double m11, double m12, double m13,
-         double m20, double m21, double m22, double m23,
-         double m30, double m31, double m32, double m33) {
+    Mat4(
+        double m00, double m01, double m02, double m03, double m10, double m11,
+        double m12, double m13, double m20, double m21, double m22, double m23,
+        double m30, double m31, double m32, double m33)
+    {
         _data[0] = m00;
         _data[1] = m01;
         _data[2] = m02;
@@ -34,9 +35,7 @@ public:
         _data[15] = m33;
     }
 
-    double operator[](int index) const {
-        return _data[index];
-    }
+    double operator[](int index) const { return _data[index]; }
 
 private:
     double _data[16];

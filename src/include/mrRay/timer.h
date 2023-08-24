@@ -15,8 +15,9 @@ MR_RAY_NAMESPACE_OPEN_SCOPE
 class Timer
 {
 public:
-    Timer(const std::string& name);
+    Timer(const std::string &name);
     ~Timer();
+
 private:
     std::string name;
     std::chrono::time_point<std::chrono::high_resolution_clock> start;

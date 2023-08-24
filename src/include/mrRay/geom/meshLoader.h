@@ -5,10 +5,10 @@
 #ifndef MR_RAY_OBJLOADER_H
 #define MR_RAY_OBJLOADER_H
 
-#include "mrRay/namespace.h"
 #include "mrRay/geom/hittableList.h"
-#include "mrRay/geom/triangle.h"
 #include "mrRay/geom/mesh.h"
+#include "mrRay/geom/triangle.h"
+#include "mrRay/namespace.h"
 
 MR_RAY_NAMESPACE_OPEN_SCOPE
 
@@ -16,31 +16,31 @@ MR_RAY_NAMESPACE_OPEN_SCOPE
 class MeshLoader
 {
 public:
-    MeshLoader(const std::string& meshPath);
+    MeshLoader(const std::string &meshPath);
     ~MeshLoader();
     /// Loads all info that represent the mesh
     ///
     /// \return Whether the load was successful
     virtual bool load() = 0;
     /// Returns the loaded mesh info
-    RawMeshInfo* getMeshInfo() const;
+    RawMeshInfo *getMeshInfo() const;
     /// Returns whether the mesh has been loaded
     bool hasLoaded() const { return _hasLoaded; }
 
 protected:
     const std::string _meshPath;
     bool _hasLoaded;
-    RawMeshInfo* _loadedMeshInfo;
+    RawMeshInfo *_loadedMeshInfo;
 };
 
 /// Loader for OBJ files
-class OBJLoader final: public MeshLoader
+class OBJLoader final : public MeshLoader
 {
 public:
-    OBJLoader(const std::string& meshPath);
+    OBJLoader(const std::string &meshPath);
     bool load() override;
 };
 
 MR_RAY_NAMESPACE_CLOSE_SCOPE
 
-#endif //MR_RAY_OBJLOADER_H
+#endif // MR_RAY_OBJLOADER_H

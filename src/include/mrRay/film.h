@@ -12,26 +12,30 @@ MR_RAY_NAMESPACE_OPEN_SCOPE
 
 struct Tile
 {
-	const unsigned int top, left, width, height;
-	Colour* colours;
+    const unsigned int top, left, width, height;
+    Colour *colours;
 
-	Tile(unsigned int top, unsigned int left, unsigned int width, 
-		 unsigned int height) 
-		: top(top), left(left), width(width), height(height) 
-	{
-		colours = new Colour[width * height];
-	}
+    Tile(
+        unsigned int top, unsigned int left, unsigned int width,
+        unsigned int height)
+        : top(top)
+        , left(left)
+        , width(width)
+        , height(height)
+    {
+        colours = new Colour[width * height];
+    }
 
-	~Tile()
-	{
-		delete[] colours;
-	}
+    ~Tile() { delete[] colours; }
 };
 
 class TilesQueue
 {
 public:
-    TilesQueue() : currentIndex(0) {}
+    TilesQueue()
+        : currentIndex(0)
+    {
+    }
 
     void addTile(std::shared_ptr<Tile> tile)
     {
@@ -39,11 +43,10 @@ public:
         tiles.push_back(tile);
     }
 
-    Tile* getTile()
+    Tile *getTile()
     {
         std::unique_lock<std::mutex> lock(queueMutex);
-        if (currentIndex < tiles.size())
-            return tiles[currentIndex++].get();
+        if (currentIndex < tiles.size()) return tiles[currentIndex++].get();
         return nullptr;
     }
 
@@ -52,6 +55,7 @@ public:
         std::unique_lock<std::mutex> lock(queueMutex);
         return tiles.size();
     }
+
 private:
     std::vector<std::shared_ptr<Tile>> tiles;
     int currentIndex;
@@ -61,30 +65,28 @@ private:
 struct Film
 {
 public:
-	const unsigned int width, height;
+    const unsigned int width, height;
 
-	Film(unsigned int width, unsigned int height) 
-		: width(width), height(height)
-	{
-		_colours = new Colour[width * height];
-	} 
+    Film(unsigned int width, unsigned int height)
+        : width(width)
+        , height(height)
+    {
+        _colours = new Colour[width * height];
+    }
 
-	~Film()
-	{
-		delete[] _colours;
-	}
+    ~Film() { delete[] _colours; }
 
-	// Copy a tile of colours to this film
-	void writeTile(const Tile& tile);
+    // Copy a tile of colours to this film
+    void writeTile(const Tile &tile);
 
     // Write film to file
-	void writeToFile(const std::string& path);
+    void writeToFile(const std::string &path);
 
-    Colour* getData();
+    Colour *getData();
 
 private:
-	std::mutex filmMutex;
-	Colour* _colours;
+    std::mutex filmMutex;
+    Colour *_colours;
 };
 
 MR_RAY_NAMESPACE_CLOSE_SCOPE

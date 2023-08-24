@@ -10,19 +10,20 @@
 
 PXR_NAMESPACE_OPEN_SCOPE
 
-class HdMrRayRenderBuffer final: public HdRenderBuffer
+class HdMrRayRenderBuffer final : public HdRenderBuffer
 {
 public:
-    HdMrRayRenderBuffer(SdfPath const& id);
+    HdMrRayRenderBuffer(SdfPath const &id);
     ~HdMrRayRenderBuffer() override;
 
-    void Sync(HdSceneDelegate *sceneDelegate, HdRenderParam *renderParam,
-              HdDirtyBits *dirtyBits) override;
+    void Sync(
+        HdSceneDelegate *sceneDelegate, HdRenderParam *renderParam,
+        HdDirtyBits *dirtyBits) override;
 
     void Finalize(HdRenderParam *renderParam) override;
 
-    bool Allocate(const GfVec3i &dimensions, HdFormat format,
-                  bool multiSampled) override;
+    bool Allocate(
+        const GfVec3i &dimensions, HdFormat format, bool multiSampled) override;
 
     unsigned int GetWidth() const override { return _width; }
 
@@ -44,9 +45,7 @@ public:
 
     bool IsConverged() const override;
 
-    void SetConverged(bool converged) {
-        _converged.store(converged);
-    }
+    void SetConverged(bool converged) { _converged.store(converged); }
 
 protected:
     void _Deallocate() override;
@@ -62,4 +61,4 @@ protected:
 
 PXR_NAMESPACE_CLOSE_SCOPE
 
-#endif //HD_MR_RAY_RENDERBUFFER_H
+#endif // HD_MR_RAY_RENDERBUFFER_H

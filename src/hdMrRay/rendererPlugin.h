@@ -16,19 +16,19 @@ public:
     virtual ~HdMrRayRendererPlugin() = default;
 
     virtual HdRenderDelegate *CreateRenderDelegate() override;
-    virtual HdRenderDelegate *CreateRenderDelegate(
-        HdRenderSettingsMap const& settingsMap) override;
+    virtual HdRenderDelegate *
+    CreateRenderDelegate(HdRenderSettingsMap const &settingsMap) override;
 
-    virtual void DeleteRenderDelegate(
-        HdRenderDelegate *renderDelegate) override;
+    virtual void DeleteRenderDelegate(HdRenderDelegate *renderDelegate) override;
 
     virtual bool IsSupported(bool gpuEnabled = true) const override;
+
 private:
-    HdMrRayRendererPlugin(const HdMrRayRendererPlugin&) = delete;
-    HdMrRayRendererPlugin &operator =(const HdMrRayRendererPlugin&) = delete;
+    HdMrRayRendererPlugin(const HdMrRayRendererPlugin &) = delete;
+    HdMrRayRendererPlugin &operator=(const HdMrRayRendererPlugin &) = delete;
 };
 
 
 PXR_NAMESPACE_CLOSE_SCOPE
 
-#endif //HD_MR_RAY_RENDER_PLUGIN_H
+#endif // HD_MR_RAY_RENDER_PLUGIN_H

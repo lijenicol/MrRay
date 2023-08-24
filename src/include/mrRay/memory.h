@@ -3,9 +3,9 @@
 
 #define ARENA_ALLOC(arena, Type) new ((arena).Alloc(sizeof(Type))) Type
 
-#include<list>
-#include<cstddef>
-#include<iostream>
+#include <cstddef>
+#include <iostream>
+#include <list>
 
 #include "mrRay/namespace.h"
 
@@ -16,17 +16,16 @@ class alignas(64) MemoryArena
 public:
     MemoryArena() { Reset(); }
 
-    ~MemoryArena() 
+    ~MemoryArena()
     {
-        for (char* block : blocks) 
-            delete[] block; 
+        for (char *block: blocks)
+            delete[] block;
     }
 
-    void* Alloc(size_t size)
+    void *Alloc(size_t size)
     {
-        if (allocated + size >= ALLOC_SIZE)
-            current = GetBlock();
-        void* ret = current;
+        if (allocated + size >= ALLOC_SIZE) current = GetBlock();
+        void *ret = current;
         current += size;
         allocated += size;
         return ret;
@@ -39,14 +38,13 @@ public:
     }
 
 private:
-    MemoryArena(const MemoryArena&) = delete;
+    MemoryArena(const MemoryArena &) = delete;
 
-    void* GetBlock()
+    void *GetBlock()
     {
         allocated = 0;
-        if (currentBlock + 1 > blocks.size())
-        {
-            char* block = new char[ALLOC_SIZE];
+        if (currentBlock + 1 > blocks.size()) {
+            char *block = new char[ALLOC_SIZE];
             blocks.push_back(block);
         }
         return blocks[currentBlock++];
@@ -54,9 +52,9 @@ private:
 
     const size_t ALLOC_SIZE = 262144;
     size_t allocated;
-    std::vector<char*> blocks;
+    std::vector<char *> blocks;
     int currentBlock;
-    void* current;
+    void *current;
 };
 
 MR_RAY_NAMESPACE_CLOSE_SCOPE

@@ -18,7 +18,7 @@ class HdMrRayRenderPass final : public HdRenderPass
 public:
     HdMrRayRenderPass(
         HdRenderIndex *index, const HdRprimCollection &collection,
-        HdRenderThread* renderThread, HdMrRayRenderer *renderer);
+        HdRenderThread *renderThread, HdMrRayRenderer *renderer);
     ~HdMrRayRenderPass() override;
 
     bool IsConverged() const override;
@@ -46,4 +46,4 @@ private:
 
 PXR_NAMESPACE_CLOSE_SCOPE
 
-#endif //HD_MR_RAY_RENDER_PASS_H
+#endif // HD_MR_RAY_RENDER_PASS_H

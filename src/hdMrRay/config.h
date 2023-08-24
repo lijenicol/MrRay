@@ -5,8 +5,8 @@
 #ifndef HD_MR_RAY_CONFIG_H
 #define HD_MR_RAY_CONFIG_H
 
-#include "pxr/pxr.h"
 #include "pxr/base/tf/singleton.h"
+#include "pxr/pxr.h"
 
 PXR_NAMESPACE_OPEN_SCOPE
 
@@ -28,12 +28,12 @@ private:
     HdMrRayConfig();
     ~HdMrRayConfig() = default;
 
-    HdMrRayConfig(const HdMrRayConfig&) = delete;
-    HdMrRayConfig& operator=(const HdMrRayConfig&) = delete;
+    HdMrRayConfig(const HdMrRayConfig &) = delete;
+    HdMrRayConfig &operator=(const HdMrRayConfig &) = delete;
 
     friend class TfSingleton<HdMrRayConfig>;
 };
 
 PXR_NAMESPACE_CLOSE_SCOPE
 
-#endif //HD_MR_RAY_CONFIG_H
+#endif // HD_MR_RAY_CONFIG_H

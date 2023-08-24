@@ -11,21 +11,21 @@
 #include <mrRay/renderEngine.h>
 #include <mrRay/scene.h>
 
-#include "renderer.h"
 #include "renderParam.h"
+#include "renderer.h"
 
 PXR_NAMESPACE_OPEN_SCOPE
 
-#define HDMRRAY_RENDER_SETTINGS_TOKENS \
-    (tileSize)
+#define HDMRRAY_RENDER_SETTINGS_TOKENS (tileSize)
 
-TF_DECLARE_PUBLIC_TOKENS(HdMrRayRenderSettingsTokens, HDMRRAY_RENDER_SETTINGS_TOKENS);
+TF_DECLARE_PUBLIC_TOKENS(
+    HdMrRayRenderSettingsTokens, HDMRRAY_RENDER_SETTINGS_TOKENS);
 
-class HdMrRayRenderDelegate final: public HdRenderDelegate
+class HdMrRayRenderDelegate final : public HdRenderDelegate
 {
 public:
     HdMrRayRenderDelegate();
-    HdMrRayRenderDelegate(HdRenderSettingsMap const& settingsMap);
+    HdMrRayRenderDelegate(HdRenderSettingsMap const &settingsMap);
 
     virtual ~HdMrRayRenderDelegate();
 
@@ -38,21 +38,18 @@ public:
     HdRenderPassSharedPtr CreateRenderPass(
         HdRenderIndex *index, const HdRprimCollection &collection) override;
 
-    HdInstancer *CreateInstancer(
-        HdSceneDelegate* delegate, SdfPath const& id) override;
+    HdInstancer *
+    CreateInstancer(HdSceneDelegate *delegate, SdfPath const &id) override;
 
-    void DestroyInstancer(HdInstancer* instancer) override;
-    HdRprim *CreateRprim(
-        const TfToken &typeId, const SdfPath &rprimId) override;
+    void DestroyInstancer(HdInstancer *instancer) override;
+    HdRprim *CreateRprim(const TfToken &typeId, const SdfPath &rprimId) override;
 
     void DestroyRprim(HdRprim *rPrim) override;
-    HdSprim *CreateSprim(
-        const TfToken &typeId, const SdfPath &sprimId) override;
+    HdSprim *CreateSprim(const TfToken &typeId, const SdfPath &sprimId) override;
 
     HdSprim *CreateFallbackSprim(const TfToken &typeId) override;
     void DestroySprim(HdSprim *sprim) override;
-    HdBprim *CreateBprim(
-        const TfToken &typeId, const SdfPath &bprimId) override;
+    HdBprim *CreateBprim(const TfToken &typeId, const SdfPath &bprimId) override;
 
     HdBprim *CreateFallbackBprim(const TfToken &typeId) override;
     void DestroyBprim(HdBprim *bprim) override;
@@ -79,4 +76,4 @@ private:
 
 PXR_NAMESPACE_CLOSE_SCOPE
 
-#endif //HD_MR_RAY_RENDER_DELEGATE_H
+#endif // HD_MR_RAY_RENDER_DELEGATE_H
