@@ -1,4 +1,6 @@
-#pragma once
+#ifndef MR_RAY_HITTABLELIST_H
+#define MR_RAY_HITTABLELIST_H
+
 #include "mrRay/geom/hittable.h"
 #include "mrRay/namespace.h"
 
@@ -26,3 +28,5 @@ public:
 };
 
 MR_RAY_NAMESPACE_CLOSE_SCOPE
+
+#endif // MR_RAY_HITTABLELIST_H

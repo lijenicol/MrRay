@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MR_RAY_HITTABLE_H
+#define MR_RAY_HITTABLE_H
 
 #include "mrRay/aabb.h"
 #include "mrRay/namespace.h"
@@ -47,3 +48,5 @@ public:
 };
 
 MR_RAY_NAMESPACE_CLOSE_SCOPE
+
+#endif // MR_RAY_HITTABLE_H

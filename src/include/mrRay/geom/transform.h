@@ -1,4 +1,6 @@
-#pragma once
+#ifndef MR_RAY_TRANSFORM_H
+#define MR_RAY_TRANSFORM_H
+
 #include "mrRay/geom/hittable.h"
 #include "mrRay/namespace.h"
 #include "mrRay/rtutils.h"
@@ -31,3 +33,5 @@ private:
 };
 
 MR_RAY_NAMESPACE_CLOSE_SCOPE
+
+#endif // MR_RAY_TRANSFORM_H

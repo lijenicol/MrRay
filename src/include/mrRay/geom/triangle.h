@@ -48,4 +48,4 @@ private:
 
 MR_RAY_NAMESPACE_CLOSE_SCOPE
 
-#endif
+#endif // MR_RAY_TRIANGLE_H

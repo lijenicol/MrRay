@@ -1,5 +1,5 @@
-#ifndef MATERIAL_TEXTURE_H
-#define MATERIAL_TEXTURE_H
+#ifndef MR_RAY_TEXTURE_H
+#define MR_RAY_TEXTURE_H
 
 #include "mrRay/namespace.h"
 #include "mrRay/rtutils.h"
@@ -87,4 +87,4 @@ private:
 
 MR_RAY_NAMESPACE_CLOSE_SCOPE
 
-#endif
+#endif // MR_RAY_TEXTURE_H

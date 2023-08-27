@@ -1,7 +1,3 @@
-//
-// Created by lijenicol on 15/06/23.
-//
-
 #ifndef HD_MR_RAY_RENDER_PASS_H
 #define HD_MR_RAY_RENDER_PASS_H
 

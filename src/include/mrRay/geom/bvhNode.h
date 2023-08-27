@@ -1,4 +1,6 @@
-#pragma once
+#ifndef MR_RAY_BVHNODE_H
+#define MR_RAY_BVHNODE_H
+
 #include "mrRay/geom/hittable.h"
 #include "mrRay/geom/hittableList.h"
 #include "mrRay/namespace.h"
@@ -24,8 +26,6 @@ public:
         box = container.box;
         left = container.left;
         right = container.right;
-        std::cerr << "\rBVH Construction 100% Complete" << std::flush;
-        std::cerr << "\n";
     }
 
     BVHNode(
@@ -52,3 +52,5 @@ bool box_z_compare(
     const std::shared_ptr<Hittable> a, const std::shared_ptr<Hittable> b);
 
 MR_RAY_NAMESPACE_CLOSE_SCOPE
+
+#endif // MR_RAY_BVHNODE_H

@@ -1,9 +1,5 @@
-//
-// Created by lijenicol on 19/06/23.
-//
-
-#ifndef DEV_RENDERENGINE_H
-#define DEV_RENDERENGINE_H
+#ifndef MR_RAY_RENDERENGINE_H
+#define MR_RAY_RENDERENGINE_H
 
 #include <string>
 
@@ -87,4 +83,4 @@ private:
 
 MR_RAY_NAMESPACE_CLOSE_SCOPE
 
-#endif // DEV_RENDERENGINE_H
+#endif // MR_RAY_RENDERENGINE_H

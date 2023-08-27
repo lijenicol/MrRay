@@ -1,5 +1,5 @@
-#ifndef MEMORY_H
-#define MEMORY_H
+#ifndef MR_RAY_MEMORY_H
+#define MR_RAY_MEMORY_H
 
 #define ARENA_ALLOC(arena, Type) new ((arena).Alloc(sizeof(Type))) Type
 
@@ -59,4 +59,4 @@ private:
 
 MR_RAY_NAMESPACE_CLOSE_SCOPE
 
-#endif
+#endif // MR_RAY_MEMORY_H

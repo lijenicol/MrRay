@@ -1,7 +1,3 @@
-//
-// Created by lijenicol on 15/06/23.
-//
-
 #include "renderPass.h"
 #include "config.h"
 #include "renderDelegate.h"

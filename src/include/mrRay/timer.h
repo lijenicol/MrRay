@@ -1,5 +1,5 @@
-#ifndef TIMER_H
-#define TIMER_H
+#ifndef MR_RAY_TIMER_H
+#define MR_RAY_TIMER_H
 
 #include <chrono>
 #include <string>
@@ -25,4 +25,4 @@ private:
 
 MR_RAY_NAMESPACE_CLOSE_SCOPE
 
-#endif
+#endif // MR_RAY_TIMER_H

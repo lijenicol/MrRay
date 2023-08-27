@@ -1,7 +1,3 @@
-//
-// Created by lijenicol on 25/06/23.
-//
-
 #ifndef MR_RAY_OBJLOADER_H
 #define MR_RAY_OBJLOADER_H
 

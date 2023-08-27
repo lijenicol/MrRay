@@ -1,5 +1,5 @@
-#ifndef FILM_H
-#define FILM_H
+#ifndef MR_RAY_FILM_H
+#define MR_RAY_FILM_H
 
 #include <mutex>
 #include <string>
@@ -91,4 +91,4 @@ private:
 
 MR_RAY_NAMESPACE_CLOSE_SCOPE
 
-#endif
+#endif // MR_RAY_FILM_H

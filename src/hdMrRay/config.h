@@ -1,7 +1,3 @@
-//
-// Created by lijenicol on 20/08/23.
-//
-
 #ifndef HD_MR_RAY_CONFIG_H
 #define HD_MR_RAY_CONFIG_H
 

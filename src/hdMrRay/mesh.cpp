@@ -1,7 +1,3 @@
-//
-// Created by lijenicol on 26/07/23.
-//
-
 #include "mesh.h"
 #include "renderParam.h"
 #include <mrRay/material/material.h>

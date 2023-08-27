@@ -1,4 +1,6 @@
-#pragma once
+#ifndef MR_RAY_SPHERE_H
+#define MR_RAY_SPHERE_H
+
 #include "mrRay/geom/hittable.h"
 #include "mrRay/namespace.h"
 #include "mrRay/rtutils.h"
@@ -29,3 +31,5 @@ public:
 };
 
 MR_RAY_NAMESPACE_CLOSE_SCOPE
+
+#endif // MR_RAY_SPHERE_H

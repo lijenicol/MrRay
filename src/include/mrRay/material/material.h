@@ -1,5 +1,5 @@
-#ifndef MATERIAL_MATERIAL_H
-#define MATERIAL_MATERIAL_H
+#ifndef MR_RAY_MATERIAL_H
+#define MR_RAY_MATERIAL_H
 
 #include "mrRay/material/texture.h"
 #include "mrRay/memory.h"
@@ -195,4 +195,4 @@ public:
 
 MR_RAY_NAMESPACE_CLOSE_SCOPE
 
-#endif
+#endif // MR_RAY_MATERIAL_H

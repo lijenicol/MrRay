@@ -1,7 +1,3 @@
-//
-// Created by lijenicol on 13/06/23.
-//
-
 #include "rendererPlugin.h"
 #include "renderDelegate.h"
 

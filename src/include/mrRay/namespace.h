@@ -1,7 +1,3 @@
-//
-// Created by lijenicol on 24/06/23.
-//
-
 #ifndef MR_RAY_NAMESPACE_H
 #define MR_RAY_NAMESPACE_H
 

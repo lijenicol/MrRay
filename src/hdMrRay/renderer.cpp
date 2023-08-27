@@ -1,7 +1,3 @@
-//
-// Created by lijenicol on 12/07/23.
-//
-
 #include "renderer.h"
 #include "config.h"
 #include "renderBuffer.h"

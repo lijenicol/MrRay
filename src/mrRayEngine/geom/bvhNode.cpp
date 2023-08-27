@@ -30,7 +30,7 @@ BVHNode::BVHNode(
         right = NULL;
 
         sorted_counter += 1;
-        printBVHProgress(sorted_counter, objects.size());
+        // printBVHProgress(sorted_counter, objects.size());
     } else if (object_span == 2) {
         // Figure which object goes either side of the split
         if (comparator(objects[start], objects[start + 1])) {
@@ -42,7 +42,7 @@ BVHNode::BVHNode(
         }
 
         sorted_counter += 2;
-        printBVHProgress(sorted_counter, objects.size());
+        // printBVHProgress(sorted_counter, objects.size());
     } else {
         // Sort objects along axis
         std::sort(objects.begin() + start, objects.begin() + end, comparator);

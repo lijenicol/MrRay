@@ -1,7 +1,3 @@
-//
-// Created by lijenicol on 26/07/23.
-//
-
 #ifndef HD_MR_RAY_MESH_H
 #define HD_MR_RAY_MESH_H
 

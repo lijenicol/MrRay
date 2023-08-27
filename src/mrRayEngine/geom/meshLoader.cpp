@@ -1,7 +1,3 @@
-//
-// Created by lijenicol on 25/06/23.
-//
-
 #include <fstream>
 
 #include "mrRay/geom/meshLoader.h"

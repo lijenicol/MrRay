@@ -1,4 +1,6 @@
-#pragma once
+#ifndef MR_RAY_RTUTILS_H
+#define MR_RAY_RTUTILS_H
+
 #include <cstdlib>
 #include <iostream>
 #include <limits>
@@ -22,12 +24,10 @@ degrees_to_radians(double degrees)
     return degrees * pi / 180.0;
 }
 
+// FIXME: This function isn't thread-safe
 inline double
 random_double()
 {
-    // FIXME: Leaving this print statement in until all uses
-    //  of this method have been knocked out
-    std::cerr << "Deprecated: random_double()" << std::endl;
     return rand() / (RAND_MAX + 1.0);
 }
 
@@ -57,3 +57,5 @@ MR_RAY_NAMESPACE_CLOSE_SCOPE
 
 #include "ray.h"
 #include "vec3.h"
+
+#endif // MR_RAY_RTUTILS_H

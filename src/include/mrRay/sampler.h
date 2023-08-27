@@ -1,5 +1,5 @@
-#ifndef SAMPLER_H
-#define SAMPLER_H
+#ifndef MR_RAY_SAMPLER_H
+#define MR_RAY_SAMPLER_H
 
 #include <random>
 
@@ -42,4 +42,4 @@ private:
 
 MR_RAY_NAMESPACE_CLOSE_SCOPE
 
-#endif
+#endif // MR_RAY_SAMPLER_H

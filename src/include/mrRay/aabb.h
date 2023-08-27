@@ -1,5 +1,5 @@
-#ifndef AABB_h
-#define AABB_h
+#ifndef MR_RAY_AABB_H
+#define MR_RAY_AABB_H
 
 #include "mrRay/namespace.h"
 #include "mrRay/rtutils.h"
@@ -40,4 +40,4 @@ AABB surrounding_box(AABB box0, AABB box1);
 
 MR_RAY_NAMESPACE_CLOSE_SCOPE
 
-#endif
+#endif // MR_RAY_AABB_H

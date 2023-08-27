@@ -1,5 +1,5 @@
-#ifndef MR_RAY_H
-#define MR_RAY_H
+#ifndef MR_RAY_RAY_H
+#define MR_RAY_RAY_H
 
 #include "mrRay/namespace.h"
 #include "mrRay/vec3.h"
@@ -27,4 +27,4 @@ public:
 
 MR_RAY_NAMESPACE_CLOSE_SCOPE
 
-#endif
+#endif // MR_RAY_RAY_H

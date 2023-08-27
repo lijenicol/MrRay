@@ -1,7 +1,3 @@
-//
-// Created by lijenicol on 29/07/23.
-//
-
 #ifndef MR_RAY_MATRIX_H
 #define MR_RAY_MATRIX_H
 

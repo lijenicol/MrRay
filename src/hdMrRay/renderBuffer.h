@@ -1,7 +1,3 @@
-//
-// Created by lijenicol on 18/06/23.
-//
-
 #ifndef HD_MR_RAY_RENDERBUFFER_H
 #define HD_MR_RAY_RENDERBUFFER_H
 

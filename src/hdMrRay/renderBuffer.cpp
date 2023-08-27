@@ -1,7 +1,3 @@
-//
-// Created by lijenicol on 18/06/23.
-//
-
 #include "renderBuffer.h"
 #include <iostream>
 #include <pxr/base/gf/vec3i.h>

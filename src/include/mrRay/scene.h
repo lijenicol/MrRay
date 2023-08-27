@@ -1,5 +1,5 @@
-#ifndef SCENE_H
-#define SCENE_H
+#ifndef MR_RAY_SCENE_H
+#define MR_RAY_SCENE_H
 
 #include <memory>
 #include <mutex>
@@ -53,4 +53,4 @@ private:
 
 MR_RAY_NAMESPACE_CLOSE_SCOPE
 
-#endif
+#endif // MR_RAY_SCENE_H

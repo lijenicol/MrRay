@@ -1,5 +1,5 @@
-#ifndef VEC3_H
-#define VEC3_H
+#ifndef MR_RAY_VEC3_H
+#define MR_RAY_VEC3_H
 
 #include <iostream>
 #include <math.h>
@@ -200,4 +200,4 @@ refract(const Vec3 &v, const Vec3 &n, double etai_over_etat)
 
 MR_RAY_NAMESPACE_CLOSE_SCOPE
 
-#endif
+#endif // MR_RAY_VEC3_H

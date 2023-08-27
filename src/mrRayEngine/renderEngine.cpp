@@ -1,7 +1,3 @@
-//
-// Created by lijenicol on 19/06/23.
-//
-
 #include "mrRay/renderEngine.h"
 
 #include <thread>

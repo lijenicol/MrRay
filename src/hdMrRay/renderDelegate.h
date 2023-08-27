@@ -1,7 +1,3 @@
-//
-// Created by lijenicol on 13/06/23.
-//
-
 #ifndef HD_MR_RAY_RENDER_DELEGATE_H
 #define HD_MR_RAY_RENDER_DELEGATE_H
 

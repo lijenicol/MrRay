@@ -1,7 +1,3 @@
-//
-// Created by lijenicol on 20/08/23.
-//
-
 #include <thread>
 
 #include "config.h"
