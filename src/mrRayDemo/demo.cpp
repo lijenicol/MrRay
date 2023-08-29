@@ -25,7 +25,7 @@ cornellBox(const RenderSettings &renderSettings)
     std::shared_ptr<Lambertian> green
         = std::make_shared<Lambertian>(Colour(.12, .45, .15));
     std::shared_ptr<DiffuseLight> light
-        = std::make_shared<DiffuseLight>(Colour(12.0, 12.0, 12.0));
+        = std::make_shared<DiffuseLight>(Colour(5, 5, 5));
     std::shared_ptr<Metal> metal
         = std::make_shared<Metal>(Colour(0.9, 0.6, 0.1), 0.92);
 
